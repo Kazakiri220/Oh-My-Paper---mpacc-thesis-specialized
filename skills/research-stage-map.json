@@ -1,0 +1,117 @@
+{
+  "survey": {
+    "base": [
+      "mpacc-thesis-writer",
+      "inno-deep-research",
+      "academic-researcher",
+      "paper-finder",
+      "paper-analyzer"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "mpacc-thesis-writer",
+        "inno-deep-research",
+        "academic-researcher",
+        "paper-analyzer"
+      ],
+      "exploration": [
+        "mpacc-thesis-writer",
+        "inno-deep-research",
+        "academic-researcher",
+        "paper-finder"
+      ]
+    }
+  },
+  "ideation": {
+    "base": [
+      "research-pipeline-planner",
+      "research-idea-convergence",
+      "mpacc-thesis-writer",
+      "inno-pipeline-planner"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
+        "inno-deep-research",
+        "academic-researcher"
+      ],
+      "exploration": [
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
+        "inno-deep-research"
+      ],
+      "implementation": [
+        "inno-pipeline-planner"
+      ]
+    }
+  },
+  "experiment": {
+    "base": [
+      "mpacc-thesis-writer",
+      "research-pipeline-planner",
+      "inno-pipeline-planner"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "mpacc-thesis-writer",
+        "research-pipeline-planner"
+      ],
+      "exploration": [
+        "mpacc-thesis-writer",
+        "inno-deep-research",
+        "academic-researcher"
+      ],
+      "implementation": [
+        "inno-pipeline-planner",
+        "mpacc-thesis-writer"
+      ]
+    }
+  },
+  "publication": {
+    "base": [
+      "inno-paper-writing",
+      "mpacc-thesis-writer",
+      "inno-paper-reviewer",
+      "inno-reference-audit",
+      "inno-figure-gen"
+    ],
+    "byTaskType": {
+      "writing": [
+        "inno-paper-writing",
+        "mpacc-thesis-writer",
+        "inno-figure-gen"
+      ],
+      "analysis": [
+        "inno-paper-reviewer",
+        "mpacc-thesis-writer",
+        "inno-reference-audit"
+      ],
+      "delivery": [
+        "mpacc-thesis-writer"
+      ]
+    }
+  },
+  "promotion": {
+    "base": [
+      "mpacc-thesis-writer",
+      "making-academic-presentations"
+    ],
+    "byTaskType": {
+      "scripting": [
+        "mpacc-thesis-writer",
+        "making-academic-presentations"
+      ],
+      "rendering": [
+        "making-academic-presentations"
+      ],
+      "narration": [
+        "mpacc-thesis-writer",
+        "making-academic-presentations"
+      ],
+      "delivery": [
+        "making-academic-presentations"
+      ]
+    }
+  }
+}

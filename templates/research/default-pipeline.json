@@ -1,0 +1,298 @@
+{
+  "templateId": "viewerleaf-mpacc-thesis-v1",
+  "version": 2,
+  "stages": {
+    "survey": {
+      "requiredElements": [
+        "school_requirements",
+        "case_evidence_inventory",
+        "literature_shortlist"
+      ],
+      "optionalElements": [
+        "advisor_preferences",
+        "industry_context",
+        "public_document_register"
+      ],
+      "qualityGate": "School requirements, case/public evidence, literature shortlist, and material gaps are traceable and recorded.",
+      "taskBlueprints": [
+        {
+          "title": "Collect school and thesis requirements",
+          "description": "Record school format, word count, citation style, thesis type requirements, advisor constraints, and integrity rules.",
+          "taskType": "exploration",
+          "priority": "high",
+          "inputsNeeded": [
+            "school requirements",
+            "advisor instructions if available"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Survey/reports/requirements.md",
+            ".pipeline/docs/mpacc_requirements.md"
+          ]
+        },
+        {
+          "title": "Build the case evidence inventory",
+          "description": "Register annual reports, announcements, inquiry replies, policies, interviews, internal materials, and data gaps with credibility levels.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "case organization or candidate cases"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Survey/reports/case-evidence-inventory.md",
+            ".pipeline/docs/case_material_register.md"
+          ]
+        },
+        {
+          "title": "Build a thesis-specific literature shortlist",
+          "description": "Collect user-supplied and verifiable literature tied to the research problem, theory, method, and case context.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "topic direction",
+            "seed references"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Survey/reports/literature-shortlist.md",
+            ".pipeline/docs/literature_matrix.md"
+          ]
+        }
+      ],
+      "recommendedSkills": [
+        "mpacc-thesis-writer",
+        "inno-deep-research",
+        "academic-researcher"
+      ]
+    },
+    "ideation": {
+      "requiredElements": [
+        "candidate_topics",
+        "topic_gate",
+        "lead_topic_selection"
+      ],
+      "optionalElements": [
+        "case_pair_comparison",
+        "advisor_risk_notes"
+      ],
+      "qualityGate": "A lead topic is selected only after real problem visibility, accounting relevance, evidence boundary, case design, and provisional answer pass review.",
+      "taskBlueprints": [
+        {
+          "title": "Generate MPAcc candidate topics",
+          "description": "Turn survey materials into 2-4 candidate topics with real observation, research question, provisional answer, case design, and evidence boundary.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "requirements",
+            "case evidence inventory",
+            "literature shortlist"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Ideation/ideas/candidate-topics.md",
+            ".pipeline/docs/topic_gate.md"
+          ]
+        },
+        {
+          "title": "Stress-test topic gates",
+          "description": "Reject or revise topics that rely on invented concepts, reconstructed indicators, data-direction conflict, causal identities, or unverifiable core claims.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "candidate topics"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Ideation/ideas/topic-risk-review.md",
+            ".pipeline/docs/topic_risk_review.md"
+          ]
+        },
+        {
+          "title": "Select and record the lead topic",
+          "description": "Confirm the selected topic with the user and record discarded alternatives, evidence boundary, and repair moves.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "topic risk review",
+            "user selection"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Ideation/publishable_angle.md",
+            ".pipeline/docs/selected_topic.md"
+          ]
+        }
+      ],
+      "recommendedSkills": [
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
+        "inno-pipeline-planner"
+      ]
+    },
+    "experiment": {
+      "requiredElements": [
+        "evidence_matrix",
+        "method_data_fit",
+        "case_analysis_plan"
+      ],
+      "optionalElements": [
+        "tool_design",
+        "calculation_workbook",
+        "case_comparison"
+      ],
+      "qualityGate": "Evidence, method, and case design can support the research question without fabricated data or method-label decoration.",
+      "taskBlueprints": [
+        {
+          "title": "Build the evidence matrix",
+          "description": "Map each claim to direct evidence, reasonable inference, unavailable internal-data limits, and missing materials.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "selected topic",
+            "case material register"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Experiment/analysis/evidence-matrix.md",
+            ".pipeline/docs/evidence_matrix.md"
+          ]
+        },
+        {
+          "title": "Check method-data fit",
+          "description": "Verify that any AHP, fsQCA, event study, text analysis, KRI, model, or case comparison has the required input data and management meaning.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "selected method or tool",
+            "evidence matrix"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Experiment/analysis/method-data-fit.md",
+            ".pipeline/docs/method_data_fit.md"
+          ]
+        },
+        {
+          "title": "Design case analysis and solution logic",
+          "description": "Build the problem-cause-solution or mechanism/effect chain that will drive the outline and later chapters.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "research question",
+            "evidence matrix"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Experiment/analysis/case-analysis-plan.md",
+            ".pipeline/docs/case_analysis_plan.md"
+          ]
+        }
+      ],
+      "recommendedSkills": [
+        "mpacc-thesis-writer"
+      ]
+    },
+    "publication": {
+      "requiredElements": [
+        "opening_report_or_outline",
+        "chapter_drafts",
+        "reference_audit"
+      ],
+      "optionalElements": [
+        "advisor_revision_log",
+        "format_check"
+      ],
+      "qualityGate": "Proposal or thesis draft is aligned with topic gate, evidence matrix, citation plan, and MPAcc quality checklist.",
+      "taskBlueprints": [
+        {
+          "title": "Draft the opening report or thesis outline",
+          "description": "Translate the selected topic, evidence boundary, literature plan, and case design into an opening report or chapter outline.",
+          "taskType": "writing",
+          "priority": "high",
+          "inputsNeeded": [
+            "selected topic",
+            "case analysis plan",
+            "literature matrix"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Publication/opening-report.md",
+            ".pipeline/docs/thesis_outline.md"
+          ]
+        },
+        {
+          "title": "Draft or revise thesis chapters",
+          "description": "Write chapters as connected work packages with placeholders for missing facts and citations tied to claims.",
+          "taskType": "writing",
+          "priority": "high",
+          "inputsNeeded": [
+            "confirmed outline",
+            "evidence matrix",
+            "citation plan"
+          ],
+          "artifactPaths": [
+            "sections/introduction.tex",
+            ".viewerleaf/research/Publication/chapter-drafts"
+          ]
+        },
+        {
+          "title": "Audit citations and MPAcc quality gates",
+          "description": "Check citation integrity, topic-problem-method alignment, evidence boundaries, and problem-cause-solution traceability.",
+          "taskType": "analysis",
+          "priority": "high",
+          "inputsNeeded": [
+            "draft",
+            "reference list",
+            "quality checklist"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Publication/review-report.md",
+            ".pipeline/docs/citation_audit.md"
+          ]
+        }
+      ],
+      "recommendedSkills": [
+        "inno-paper-writing",
+        "mpacc-thesis-writer",
+        "inno-paper-reviewer",
+        "inno-reference-audit"
+      ]
+    },
+    "promotion": {
+      "requiredElements": [
+        "defense_qa",
+        "defense_slides_or_outline"
+      ],
+      "optionalElements": [
+        "oral_script",
+        "advisor_final_check"
+      ],
+      "qualityGate": "Defense materials answer the research question, anticipate methodological and evidence challenges, and disclose limitations honestly.",
+      "taskBlueprints": [
+        {
+          "title": "Prepare defense Q&A",
+          "description": "Generate likely defense questions and answer points from the confirmed draft, evidence boundaries, and limitations.",
+          "taskType": "delivery",
+          "priority": "medium",
+          "inputsNeeded": [
+            "stable draft",
+            "review report"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Promotion/defense-qa.md",
+            ".pipeline/docs/defense_qa.md"
+          ]
+        },
+        {
+          "title": "Prepare defense outline or slides",
+          "description": "Convert the thesis into a concise defense narrative covering problem, evidence, method, findings, solution, contribution, and limitations.",
+          "taskType": "delivery",
+          "priority": "medium",
+          "inputsNeeded": [
+            "stable draft",
+            "defense Q&A"
+          ],
+          "artifactPaths": [
+            ".viewerleaf/research/Promotion/slides",
+            ".pipeline/docs/defense_outline.md"
+          ]
+        }
+      ],
+      "recommendedSkills": [
+        "mpacc-thesis-writer",
+        "making-academic-presentations"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "oh-my-paper-codex",
+  "interface": {
+    "displayName": "Oh My Paper Codex"
+  },
+  "plugins": [
+    {
+      "name": "oh-my-paper-codex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/oh-my-paper-codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
