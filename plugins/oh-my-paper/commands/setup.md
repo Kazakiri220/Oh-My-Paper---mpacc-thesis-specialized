@@ -118,7 +118,7 @@ if (!already) {
 （空，随项目推进逐步填充）
 ```
 
-**`.pipeline/memory/orchestrator_state.md`**、**`execution_context.md`**、**`review_log.md`**、**`agent_handoff.md`**、**`decision_log.md`**、**`literature_bank.md`**、**`evidence_ledger.md`**：均创建空白初始版本。
+**`.pipeline/memory/orchestrator_state.md`**、**`execution_context.md`**、**`review_log.md`**、**`agent_handoff.md`**、**`decision_log.md`**、**`literature_bank.md`**、**`experiment_ledger.md`**：均创建空白初始版本。
 
 **`.pipeline/tasks/tasks.json`**：
 ```json

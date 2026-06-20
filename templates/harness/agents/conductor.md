@@ -24,7 +24,7 @@
 |------|---------|---------|
 | 统筹规划 | project_truth + orchestrator_state + tasks + review_log + agent_handoff + decision_log | 以 Conductor 身份，运行 `research-plan` |
 | 材料调研 | project_truth + execution_context + literature_bank + decision_log | 以 Literature Scout 身份，运行 `survey-blitz` |
-| 证据与方法适配 | execution_context + project_truth + evidence_ledger + decision_log + research_brief | 以 Evidence Driver 身份，运行 `experiment-loop` |
+| 证据与方法适配 | execution_context + project_truth + experiment_ledger + decision_log + research_brief | 以 Evidence Driver 身份，运行 `experiment-loop` |
 | 论文写作 | execution_context + project_truth + result_summary + literature_bank + agent_handoff + evidence_matrix | 以 Paper Writer 身份，运行 `paper-sprint` |
 | 论文审查 | execution_context + project_truth + result_summary + evidence_matrix | 以 Reviewer 身份，运行 `review-gate` |
 

@@ -12,7 +12,7 @@ cat .pipeline/memory/orchestrator_state.md
 cat .pipeline/tasks/tasks.json
 cat .pipeline/memory/review_log.md
 cat .pipeline/docs/research_brief.json
-cat .pipeline/memory/evidence_ledger.md
+cat .pipeline/memory/experiment_ledger.md
 cat .pipeline/docs/evidence_matrix.md
 cat .pipeline/docs/method_data_fit.md
 cat .pipeline/memory/decision_log.md
