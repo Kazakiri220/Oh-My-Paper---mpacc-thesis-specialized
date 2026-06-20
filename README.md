@@ -36,7 +36,7 @@
 
 ```bash
 # In Claude Code:
-/plugin marketplace add /path/to/Oh-My-Paper-mpacc-thesis-specialized
+/plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
 ```
 
@@ -128,7 +128,7 @@ cp -r /path/to/oh-my-paper/plugins/oh-my-paper/. \
 ### Install from Local Directory
 
 ```bash
-git clone <this-specialized-repo-url> /tmp/oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
 # In Claude Code:
 /plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
@@ -398,7 +398,7 @@ Oh My Paper - mpacc-thesis-specialized also ships a **Codex plugin** (`oh-my-pap
 
 ```bash
 # 1. Clone the repo
-git clone <this-specialized-repo-url> /tmp/oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
 cd /tmp/oh-my-paper-mpacc
 
 # 2. One-command install
@@ -409,7 +409,7 @@ cd /tmp/oh-my-paper-mpacc
 
 ```powershell
 # 1. Clone the repo
-git clone <this-specialized-repo-url> $env:TEMP\oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git $env:TEMP\oh-my-paper-mpacc
 Set-Location $env:TEMP\oh-my-paper-mpacc
 
 # 2. One-command install

@@ -36,7 +36,7 @@
 
 ```bash
 # 在 Claude Code 里：
-/plugin marketplace add /path/to/Oh-My-Paper-mpacc-thesis-specialized
+/plugin marketplace Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
 ```
 
@@ -85,7 +85,7 @@ Oh My Paper - mpacc-thesis-specialized 让 Claude Code / Codex 按 MPAcc 学位�
 ### 第一步：添加 marketplace
 
 ```bash
-/plugin marketplace add /path/to/Oh-My-Paper-mpacc-thesis-specialized
+/plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 ```
 
 ### 第二步：安装插件
@@ -128,9 +128,9 @@ cp -r /path/to/oh-my-paper/plugins/oh-my-paper/. \
 ### 从本地目录安装
 
 ```bash
-git clone <本特化版仓库地址> /tmp/oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
 # 在 Claude Code 里：
-/plugin marketplace add /tmp/oh-my-paper-mpacc
+/plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
 ```
 
@@ -349,7 +349,7 @@ Conductor 可以把材料整理、证据核查、章节草拟和引用审查任�
 
 ```bash
 # 第一步：添加 marketplace
-/plugin marketplace add /path/to/Oh-My-Paper-mpacc-thesis-specialized
+/plugin marketplace Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 
 # 第二步：安装插件
 /plugin install omp@oh-my-paper
@@ -399,7 +399,7 @@ Oh My Paper - mpacc-thesis-specialized 同时提供 **Codex 插件**（`oh-my-pa
 
 ```bash
 # 1. 克隆仓库
-git clone <本特化版仓库地址> /tmp/oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
 cd /tmp/oh-my-paper-mpacc
 
 # 2. 一键安装
@@ -410,7 +410,7 @@ cd /tmp/oh-my-paper-mpacc
 
 ```powershell
 # 1. 克隆仓库
-git clone <本特化版仓库地址> $env:TEMP\oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git $env:TEMP\oh-my-paper-mpacc
 Set-Location $env:TEMP\oh-my-paper-mpacc
 
 # 2. 一键安装
