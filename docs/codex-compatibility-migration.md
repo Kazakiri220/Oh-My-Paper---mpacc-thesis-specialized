@@ -368,7 +368,7 @@ reviewer
 ### 任务
 
 - [x] 在插件中创建 `hooks/hooks.json`，并在 manifest 中明确 `hooks` 路径。
-- [x] 使用 `PLUGIN_ROOT` 定位插件脚本，不依赖安装目录硬编码。
+- [x] 使用 `CLAUDE_PLUGIN_ROOT` 定位插件脚本，不依赖安装目录硬编码。
 - [x] 为生成项目创建 `.codex/hooks.json`，命令同时提供 Unix 和 `commandWindows` 版本。
 - [x] `SessionStart` 输出符合 Codex additional context 规则。
 - [x] `Stop` hook 输出合法 JSON，不再直接打印普通文本。

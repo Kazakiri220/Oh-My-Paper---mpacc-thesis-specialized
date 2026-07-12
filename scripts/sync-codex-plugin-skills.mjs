@@ -18,6 +18,7 @@ const promptRoot = path.join(pluginRoot, "prompts");
 const pluginSkillsRoot = path.join(pluginRoot, "skills");
 const canonicalSkillsRoot = path.join(repoRoot, "skills");
 const pluginManifestPath = path.join(pluginRoot, ".codex-plugin", "plugin.json");
+const pluginHooksPath = path.join(pluginRoot, "hooks", "hooks.json");
 const marketplacePath = path.join(repoRoot, ".agents", "plugins", "marketplace.json");
 const packagePath = path.join(repoRoot, "package.json");
 
@@ -113,7 +114,7 @@ function syncSkills(files) {
 function syncPluginMetadata() {
   const manifest = JSON.parse(readFileSync(pluginManifestPath, "utf8"));
   const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
-  if (manifest.version !== packageJson.version) {
+  if (!hasCurrentPluginVersion(manifest.version, packageJson.version)) {
     manifest.version = packageJson.version;
     writeFileSync(pluginManifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   }
@@ -147,7 +148,9 @@ function validatePluginMetadata(report) {
     const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
     const marketplace = JSON.parse(readFileSync(marketplacePath, "utf8"));
     if (manifest.name !== "oh-my-paper-codex") report.push("plugin manifest has an unexpected name");
-    if (manifest.version !== packageJson.version) report.push("plugin manifest version must match package.json");
+    if (!hasCurrentPluginVersion(manifest.version, packageJson.version)) {
+      report.push("plugin manifest version must match package.json or use its +codex.<cachebuster> suffix");
+    }
     if (manifest.skills !== "./skills/") report.push("plugin manifest must expose ./skills/");
     if (manifest.hooks !== "./hooks/hooks.json") report.push("plugin manifest must expose ./hooks/hooks.json");
     if (!marketplace.plugins?.some((plugin) => plugin?.name === manifest.name)) {
@@ -155,6 +158,39 @@ function validatePluginMetadata(report) {
     }
   } catch (error) {
     report.push(`invalid plugin or marketplace JSON: ${error.message}`);
+  }
+  validatePluginHooks(report);
+}
+
+function hasCurrentPluginVersion(version, packageVersion) {
+  if (version === packageVersion) return true;
+  const prefix = `${packageVersion}+codex.`;
+  return typeof version === "string"
+    && version.startsWith(prefix)
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(version.slice(prefix.length));
+}
+
+function validatePluginHooks(report) {
+  try {
+    const config = JSON.parse(readFileSync(pluginHooksPath, "utf8"));
+    const unixRoot = "${CLAUDE_PLUGIN_ROOT}";
+    const windowsRoot = "${CLAUDE_PLUGIN_ROOT}";
+    const expected = [
+      ["SessionStart", "on-session-start.mjs"],
+      ["Stop", "on-task-complete.mjs"],
+      ["PostToolUse", "on-stage-transition.mjs"],
+    ];
+    for (const [eventName, script] of expected) {
+      const handler = config.hooks?.[eventName]?.[0]?.hooks?.[0];
+      if (handler?.command !== `node "${unixRoot}/scripts/${script}"`) {
+        report.push(`${eventName} hook must use ${unixRoot}`);
+      }
+      if (handler?.commandWindows !== `node "${windowsRoot}/scripts/${script}"`) {
+        report.push(`${eventName} Windows hook must use ${windowsRoot}`);
+      }
+    }
+  } catch (error) {
+    report.push(`invalid Codex hook JSON: ${error.message}`);
   }
 }
 

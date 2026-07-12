@@ -17,8 +17,8 @@ description: "Initialize or repair an Oh My Paper thesis project. Use for projec
 
 - `.pipeline/memory/`、`.pipeline/tasks/`、`.pipeline/docs/`、`materials/`、`sections/`
 - `.agents/skills/` 中的 `mpacc-thesis-writer` 与当前任务所需的核心 Skills
-- `.codex/agents/conductor.toml`、`literature-scout.toml`、`evidence-driver.toml`、`paper-writer.toml`、`reviewer.toml`；模板位于 `${PLUGIN_ROOT}/agents/`
-- `.codex/hooks.json` 与 `.codex/hooks/`；模板位于 `${PLUGIN_ROOT}/hooks/` 和 `${PLUGIN_ROOT}/scripts/`，保留 `commandWindows` 字段
+- `.codex/agents/conductor.toml`、`literature-scout.toml`、`evidence-driver.toml`、`paper-writer.toml`、`reviewer.toml`；模板位于 `${CLAUDE_PLUGIN_ROOT}/agents/`
+- `.codex/hooks.json` 与 `.codex/hooks/`；模板位于 `${CLAUDE_PLUGIN_ROOT}/hooks/` 和 `${CLAUDE_PLUGIN_ROOT}/scripts/`，保留 `commandWindows` 字段
 - 精简的 `AGENTS.md`，包含证据边界、文件路由和验证规则
 
 不要把 Claude 的 `settings.json`、Markdown personas 或 slash-command 配置复制进 `.codex/`。保留现有 `.claude/` 视图以兼容 Claude Code。

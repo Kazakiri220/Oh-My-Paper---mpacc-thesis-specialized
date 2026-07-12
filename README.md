@@ -34,13 +34,20 @@
 
 ## TL;DR
 
+Choose the runtime you use:
+
+**Claude Code**
+
 ```bash
-# In Claude Code:
 /plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
 ```
 
-Restart Claude Code. Run `/omp:setup` inside your MPAcc thesis project, then drive the full pipeline with `/omp:survey`, `/omp:ideate`, `/omp:experiment`, and `/omp:write`. No GUI, no window-switching — everything in the terminal.
+Restart Claude Code, then run `/omp:setup` inside your MPAcc thesis project.
+
+**Codex**
+
+Use the operating-system-specific commands in [Install for Codex](#install-for-codex). After installation, open a new Codex session and verify `/skills` before using `$omp-setup`.
 
 ---
 
@@ -49,6 +56,7 @@ Restart Claude Code. Run `/omp:setup` inside your MPAcc thesis project, then dri
 - [Why This Exists](#why-this-exists)
 - [Install](#install)
 - [Claude Code Slash Commands](#claude-code-slash-commands)
+- [Codex Usage and Differences](#codex-usage-and-differences)
 - [The MPAcc Agent Team](#the-mpacc-agent-team)
 - [MPAcc Thesis Skill Chain](#mpacc-thesis-skill-chain)
 - [Hooks](#hooks)
@@ -82,23 +90,25 @@ Install it and forget about it. Your sessions get smarter. Your thesis progress 
 
 ## Install
 
-### Step 1: Add the marketplace
+### Install for Claude Code
+
+#### Step 1: Add the marketplace
 
 ```bash
 /plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 ```
 
-### Step 2: Install the plugin
+#### Step 2: Install the plugin
 
 ```bash
 /plugin install omp@oh-my-paper
 ```
 
-### Step 3: Restart Claude Code
+#### Step 3: Restart Claude Code
 
 Required for hooks to activate.
 
-### Step 4: Initialize your project
+#### Step 4: Initialize your project
 
 ```bash
 /omp:setup
@@ -106,7 +116,7 @@ Required for hooks to activate.
 
 This scaffolds the `.pipeline/` directory and registers the `SessionStart` hook for your project.
 
-### Update
+#### Update
 
 The most reliable way to get the latest version:
 
@@ -125,7 +135,7 @@ cp -r /path/to/oh-my-paper/plugins/oh-my-paper/. \
 /reload-plugins
 ```
 
-### Install from Local Directory
+#### Install from Local Directory
 
 ```bash
 git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
@@ -133,6 +143,36 @@ git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.
 /plugin marketplace add Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized
 /plugin install omp@oh-my-paper
 ```
+
+### Install for Codex
+
+The Codex installer needs both `node` and `codex` on your `PATH`. It registers this clone as a local marketplace, so keep the clone while the plugin is installed.
+
+#### macOS / Linux
+
+```bash
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git ~/oh-my-paper-mpacc
+cd ~/oh-my-paper-mpacc
+sh ./scripts/install-codex-plugin.sh
+```
+
+#### Windows (PowerShell)
+
+```powershell
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git "$HOME\oh-my-paper-mpacc"
+Set-Location "$HOME\oh-my-paper-mpacc"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-codex-plugin.ps1
+```
+
+#### Windows (Command Prompt)
+
+```cmd
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git "%USERPROFILE%\oh-my-paper-mpacc"
+cd /d "%USERPROFILE%\oh-my-paper-mpacc"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-codex-plugin.ps1
+```
+
+Do not run `sh ./scripts/install-codex-plugin.sh` in Windows PowerShell or Command Prompt; `sh` is for macOS/Linux, Git Bash, or WSL. After installing, open a new Codex session, check `/skills`, and use `$omp-setup` to initialize a thesis project. Use `/hooks` to review and explicitly trust the bundled hooks. Run `node scripts/manage-codex-plugin.mjs status` to inspect the installation; pull updates and rerun the matching installer to upgrade.
 
 ---
 
@@ -388,41 +428,9 @@ Any change to cached content requires version bumps in **both**:
 
 ---
 
-## Codex Support
+## Codex Usage and Differences
 
 Oh My Paper - mpacc-thesis-specialized also ships a **Codex plugin** (`oh-my-paper-codex`) that shares the same MPAcc thesis harness concepts, agents, and skills as the Claude Code plugin.
-
-### Install on Codex
-
-**macOS / Linux**
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git ~/oh-my-paper-mpacc
-cd ~/oh-my-paper-mpacc
-
-# 2. One-command install
-sh ./scripts/install-codex-plugin.sh
-```
-
-**Windows (PowerShell)**
-
-```powershell
-# 1. Clone the repo
-git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git "$HOME\oh-my-paper-mpacc"
-Set-Location "$HOME\oh-my-paper-mpacc"
-
-# 2. One-command install
-powershell -ExecutionPolicy Bypass -File .\scripts\install-codex-plugin.ps1
-```
-
-What the installer does:
-
-- Checks the essential plugin manifest, workflow Skill, and hook files, then calls stable `codex plugin marketplace` and `codex plugin` subcommands.
-- Adds the repository marketplace and installs `oh-my-paper-codex` without overwriting unrelated marketplaces or plugins.
-- Uses `node` under the hood; make sure both `node` and `codex` are available on your `PATH`.
-
-Keep this clone while the plugin is installed: it is the local marketplace source. To inspect, upgrade, or remove the plugin, run `node scripts/manage-codex-plugin.mjs status`, pull updates and rerun the installer, or use the matching uninstall script. The installer reports marketplace visibility, installation state, packaged Skills, and hook-trust status separately.
 
 ### Use in Codex CLI
 
