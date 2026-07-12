@@ -187,4 +187,3 @@ fn write_payload_and_close(child: &mut Child, payload: &str) -> Result<()> {
     drop(stdin);
     Ok(())
 }
-

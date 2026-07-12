@@ -22,10 +22,14 @@ primaryIntent: Invoke Codex as a sub-agent for coding tasks when OpenAI models a
 ## 调用方式
 
 ```bash
-codex --approval-mode full-auto \
-  -p "<详细任务描述>" \
-  --cwd {baseDir}
+cd {baseDir}
+codex exec --sandbox workspace-write - <<'CODEX_PROMPT'
+<详细任务描述>
+CODEX_PROMPT
 ```
+
+这是后台自动化路径。若用户需要亲自进行交互式对话，可以在项目目录手动运行
+`codex "<prompt>"`；该方式不用于脚本化委派。
 
 ## 注意
 - 默认优先使用 Claude Code（推理能力更强）

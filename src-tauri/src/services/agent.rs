@@ -1,5 +1,4 @@
-
-use std::io::BufRead;
+use std::io::{BufRead, Read};
 use std::path::Path;
 
 use anyhow::{Context, Result};
@@ -8,19 +7,40 @@ use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
 use crate::models::{
-    AgentMessage, AgentRunResult,
-    AgentSessionSummary, AgentTaskContext, StreamChunk, UsageInfo,
+    AgentMessage, AgentRunResult, AgentSessionSummary, AgentTaskContext, StreamChunk, UsageInfo,
 };
 use crate::services::{compute_node, profile, provider, skill};
 use crate::state::AppState;
 
 use std::sync::atomic::Ordering;
+use std::sync::Arc;
 
 fn serialize_tool_args(args: &serde_json::Value) -> String {
     match args {
         serde_json::Value::Null => String::new(),
         serde_json::Value::Object(map) if map.is_empty() => String::new(),
         _ => serde_json::to_string_pretty(args).unwrap_or_default(),
+    }
+}
+
+fn codex_run_options(
+    profile: &crate::models::ProfileConfig,
+    provider: &crate::models::ProviderConfig,
+) -> crate::services::cli_agent::CliRunOptions {
+    let reasoning_effort = serde_json::from_str::<serde_json::Value>(&provider.meta_json)
+        .ok()
+        .and_then(|value| {
+            value
+                .get("runtime")?
+                .get("effort")?
+                .as_str()
+                .map(ToOwned::to_owned)
+        });
+    crate::services::cli_agent::CliRunOptions {
+        // An empty profile model intentionally leaves Codex's own default in
+        // charge. The UI writes a non-empty value only after a model is chosen.
+        model: profile.model.trim().to_string(),
+        reasoning_effort,
     }
 }
 
@@ -142,9 +162,10 @@ pub fn run_agent(
         // regardless of the current research stage. This ensures the AI always
         // receives the iteration workflow rules (edit→sync→run→analyze→iterate).
         {
-            let skill_dir = state.sidecar_dir.parent().map(|p| {
-                p.join("skills").join("remote-experiment").join("SKILL.md")
-            });
+            let skill_dir = state
+                .sidecar_dir
+                .parent()
+                .map(|p| p.join("skills").join("remote-experiment").join("SKILL.md"));
             // Also try the bundled skills directory under resources
             let bundled_skill = state.sidecar_dir.parent().map(|p| {
                 p.join("resources")
@@ -209,10 +230,9 @@ pub fn run_agent(
                     // Replace existing managed section
                     let start_marker = "<!-- VIEWERLEAF_COMPUTE_NODE_START -->";
                     let end_marker = "<!-- VIEWERLEAF_COMPUTE_NODE_END -->";
-                    if let (Some(start), Some(end_pos)) = (
-                        existing.find(start_marker),
-                        existing.find(end_marker),
-                    ) {
+                    if let (Some(start), Some(end_pos)) =
+                        (existing.find(start_marker), existing.find(end_marker))
+                    {
                         let before = &existing[..start.saturating_sub(2)]; // trim preceding \n\n
                         let after = &existing[end_pos + end_marker.len()..];
                         format!("{}{}{}", before, managed_section, after)
@@ -242,8 +262,6 @@ pub fn run_agent(
         .filter(|value| !value.trim().is_empty())
         .map(ToOwned::to_owned)
         .unwrap_or_else(|| Uuid::new_v4().to_string());
-
-
 
     // ── Direct CLI path (claude-code / codex) ──
     // Session and user message are already inserted by prepare_user_message().
@@ -280,30 +298,44 @@ pub fn run_agent(
         }
     }
 
-    let (mut child, cli_stdin) = crate::services::cli_agent::spawn_cli_agent(
+    let cli_options = codex_run_options(&profile, &prov);
+    let (child, cli_stdin) = crate::services::cli_agent::spawn_cli_agent(
         state,
         &prov.vendor,
         &user_message,
         &project_root,
         &system_prompt,
         remote_session_id.as_deref(),
+        &cli_options,
     )
     .with_context(|| "failed to spawn CLI agent".to_string())?;
 
-    // Store sidecar PID and stdin handle for cancellation / permission response support
+    let child = Arc::new(std::sync::Mutex::new(child));
+
+    // Store the CLI process, PID, and stdin handle for cancellation /
+    // permission-response support.
     {
-        let pid = child.id();
+        let pid = child.lock().expect("CLI child lock poisoned").id();
         let mut active = state
             .active_sidecar
             .lock()
             .expect("active_sidecar lock poisoned");
         *active = Some(pid);
+        let mut active_child = state
+            .active_cli_child
+            .lock()
+            .expect("active CLI child lock poisoned");
+        *active_child = Some(Arc::clone(&child));
         // Also write to caller-provided output if given (used by experiment daemon)
         if let Some(out) = sidecar_pid_out {
             out.store(pid, Ordering::SeqCst);
         }
     }
-    {
+    if prov.vendor == "codex" {
+        // Codex receives its complete prompt in spawn_cli_agent. Closing stdin
+        // is required for `codex exec -` to begin the run.
+        drop(cli_stdin);
+    } else {
         let mut stdin_slot = state
             .active_sidecar_stdin
             .lock()
@@ -311,7 +343,24 @@ pub fn run_agent(
         *stdin_slot = Some(cli_stdin);
     }
 
-    let stdout = child.stdout.take().context("sidecar stdout unavailable")?;
+    let stdout = child
+        .lock()
+        .expect("CLI child lock poisoned")
+        .stdout
+        .take()
+        .context("sidecar stdout unavailable")?;
+    let stderr = child
+        .lock()
+        .expect("CLI child lock poisoned")
+        .stderr
+        .take()
+        .context("sidecar stderr unavailable")?;
+    let stderr_reader = std::thread::spawn(move || {
+        let mut reader = std::io::BufReader::with_capacity(8 * 1024, stderr);
+        let mut output = String::new();
+        let _ = reader.read_to_string(&mut output);
+        output
+    });
     let reader = std::io::BufReader::with_capacity(256, stdout);
     let mut full_response = String::new();
     let mut active_thinking = String::new();
@@ -320,15 +369,54 @@ pub fn run_agent(
     let mut done_usage: Option<UsageInfo> = None;
     let mut final_remote_session_id: Option<String> = None;
     let mut assistant_timeline: Vec<AssistantTimelineItem> = Vec::new();
+    let mut codex_parser = (prov.vendor == "codex")
+        .then(|| crate::services::codex_jsonl::CodexJsonlParser::new(cli_options.model.clone()));
 
     for line in reader.lines() {
-        let line = line?;
+        let line = match line {
+            Ok(line) => line,
+            Err(err) => {
+                last_error = Some(format!("failed to read CLI output: {err}"));
+                break;
+            }
+        };
         if line.trim().is_empty() {
             continue;
         }
 
-        match serde_json::from_str::<StreamChunk>(&line) {
-            Ok(chunk) => match &chunk {
+        let chunks = if let Some(parser) = codex_parser.as_mut() {
+            match parser.parse_line(&line) {
+                Ok(chunks) => chunks,
+                Err(err) => {
+                    // A corrupt line must not discard earlier or later valid
+                    // Codex events from the same turn.
+                    let _ = app_handle.emit(
+                        "agent:stream",
+                        &StreamChunk::StatusUpdate {
+                            status: "diagnostic".into(),
+                            message: err,
+                        },
+                    );
+                    continue;
+                }
+            }
+        } else {
+            match serde_json::from_str::<StreamChunk>(&line) {
+                Ok(chunk) => vec![chunk],
+                Err(err) => {
+                    let _ = app_handle.emit(
+                        "agent:stream",
+                        &StreamChunk::Error {
+                            message: format!("failed to decode sidecar chunk: {err}"),
+                        },
+                    );
+                    continue;
+                }
+            }
+        };
+
+        for chunk in chunks {
+            match &chunk {
                 StreamChunk::ThinkingDelta { content } => {
                     active_thinking.push_str(content);
                     let _ = app_handle.emit("agent:stream", &chunk);
@@ -383,9 +471,6 @@ pub fn run_agent(
                     output,
                     status,
                 } => {
-                    full_response.push('\n');
-                    full_response.push_str(output);
-                    full_response.push('\n');
                     let resolved_status = status.as_deref().unwrap_or("completed").to_string();
                     let preview = truncate_preview(output, 240);
                     let matched_idx = if !tool_use_id.is_empty() {
@@ -424,22 +509,19 @@ pub fn run_agent(
                 _ => {
                     let _ = app_handle.emit("agent:stream", &chunk);
                 }
-            },
-            Err(err) => {
-                let _ = app_handle.emit(
-                    "agent:stream",
-                    &StreamChunk::Error {
-                        message: format!("failed to decode sidecar chunk: {err}"),
-                    },
-                );
             }
         }
     }
 
-    let output = child
-        .wait_with_output()
+    let exit_status = child
+        .lock()
+        .expect("CLI child lock poisoned")
+        .wait()
         .context("failed to wait for sidecar")?;
-    if !output.status.success() {
+    let stderr = stderr_reader
+        .join()
+        .unwrap_or_else(|_| "failed to collect CLI stderr".to_string());
+    if !exit_status.success() {
         if state.sidecar_cancelled.load(Ordering::SeqCst) {
             let all_thinking = merge_thinking_segments(&committed_thinking, &active_thinking);
             let partial_content =
@@ -447,20 +529,7 @@ pub fn run_agent(
             if !partial_content.trim().is_empty() {
                 persist_assistant_message(state, &session_id, profile_id, &partial_content)?;
             }
-            {
-                let mut active = state
-                    .active_sidecar
-                    .lock()
-                    .expect("active_sidecar lock poisoned");
-                *active = None;
-            }
-            {
-                let mut stdin_slot = state
-                    .active_sidecar_stdin
-                    .lock()
-                    .expect("active_sidecar_stdin lock poisoned");
-                *stdin_slot = None;
-            }
+            clear_active_cli_handles(state);
             let usage = done_usage.unwrap_or_else(|| UsageInfo {
                 input_tokens: 0,
                 output_tokens: 0,
@@ -481,11 +550,10 @@ pub fn run_agent(
             });
         }
 
-        let stderr = String::from_utf8_lossy(&output.stderr);
         let error_message = if stderr.trim().is_empty() {
             last_error.unwrap_or_else(|| "agent sidecar failed with empty stderr".to_string())
         } else {
-            stderr.to_string()
+            truncate_preview(&stderr, 4_000)
         };
         let _ = app_handle.emit(
             "agent:stream",
@@ -505,6 +573,7 @@ pub fn run_agent(
             profile_id,
             &format!("Error: {error_message}"),
         )?;
+        clear_active_cli_handles(state);
         return Err(anyhow::anyhow!("agent sidecar failed: {error_message}"));
     }
 
@@ -548,20 +617,7 @@ pub fn run_agent(
     }
 
     // Clear sidecar PID and stdin
-    {
-        let mut active = state
-            .active_sidecar
-            .lock()
-            .expect("active_sidecar lock poisoned");
-        *active = None;
-    }
-    {
-        let mut stdin_slot = state
-            .active_sidecar_stdin
-            .lock()
-            .expect("active_sidecar_stdin lock poisoned");
-        *stdin_slot = None;
-    }
+    clear_active_cli_handles(state);
 
     let _ = app_handle.emit(
         "agent:stream",
@@ -591,9 +647,20 @@ pub fn cancel_agent(state: &AppState) -> Result<bool> {
         .lock()
         .expect("active_sidecar lock poisoned");
     if let Some(pid) = active.take() {
+        drop(active);
         // Mark as user-initiated cancellation so run_agent knows not to
         // treat the non-zero exit code as an error.
         state.sidecar_cancelled.store(true, Ordering::SeqCst);
+        let active_child = state
+            .active_cli_child
+            .lock()
+            .expect("active CLI child lock poisoned")
+            .take();
+        if let Some(child) = active_child {
+            // This direct handle is reliable in restricted Windows desktop
+            // contexts where a PID-only taskkill command can be denied.
+            let _ = child.lock().expect("CLI child lock poisoned").kill();
+        }
         #[cfg(unix)]
         {
             // Kill entire process group (sidecar + Claude CLI children).
@@ -608,14 +675,36 @@ pub fn cancel_agent(state: &AppState) -> Result<bool> {
         }
         #[cfg(not(unix))]
         {
-            let _ = std::process::Command::new("taskkill")
-                .args(["/PID", &pid.to_string(), "/F"])
+            let _ = std::process::Command::new("taskkill.exe")
+                .args(["/PID", &pid.to_string(), "/T", "/F"])
                 .output();
         }
         Ok(true)
     } else {
         Ok(false)
     }
+}
+
+fn clear_active_cli_handles(state: &AppState) {
+    let mut active = state
+        .active_sidecar
+        .lock()
+        .expect("active_sidecar lock poisoned");
+    *active = None;
+    drop(active);
+
+    let mut active_child = state
+        .active_cli_child
+        .lock()
+        .expect("active CLI child lock poisoned");
+    *active_child = None;
+    drop(active_child);
+
+    let mut stdin_slot = state
+        .active_sidecar_stdin
+        .lock()
+        .expect("active_sidecar_stdin lock poisoned");
+    *stdin_slot = None;
 }
 
 pub fn get_agent_messages(state: &AppState, session_id: Option<&str>) -> Result<Vec<AgentMessage>> {
@@ -921,4 +1010,84 @@ fn truncate_preview(text: &str, max_chars: usize) -> String {
     }
     out.push_str("...");
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use std::path::{Path, PathBuf};
+    use std::process::Command;
+    use std::sync::atomic::AtomicBool;
+    use std::sync::{Arc, Mutex, RwLock};
+    use std::time::Duration;
+
+    use rusqlite::Connection;
+
+    use super::{cancel_agent, AppState};
+
+    fn test_state() -> AppState {
+        AppState {
+            db: Mutex::new(Connection::open_in_memory().expect("in-memory database")),
+            project_config: RwLock::new(crate::state::empty_project_config()),
+            last_compile: RwLock::new(crate::state::default_compile_result(
+                Path::new(""),
+                "main.tex",
+            )),
+            terminals: Mutex::new(HashMap::new()),
+            app_root: PathBuf::new(),
+            sidecar_dir: PathBuf::new(),
+            skills_dir: PathBuf::new(),
+            app_data_dir: PathBuf::new(),
+            active_sidecar: Mutex::new(None),
+            active_cli_child: Mutex::new(None),
+            sidecar_cancelled: AtomicBool::new(false),
+            active_sidecar_stdin: Mutex::new(None),
+        }
+    }
+
+    #[cfg(windows)]
+    fn long_running_child() -> std::process::Child {
+        Command::new("cmd.exe")
+            .args(["/C", "ping -n 30 127.0.0.1 > NUL"])
+            .spawn()
+            .expect("start fake CLI child")
+    }
+
+    #[cfg(not(windows))]
+    fn long_running_child() -> std::process::Child {
+        Command::new("sh")
+            .args(["-c", "sleep 30"])
+            .spawn()
+            .expect("start fake CLI child")
+    }
+
+    #[test]
+    fn cancellation_terminates_fake_cli_and_clears_active_state() {
+        let state = test_state();
+        let child = Arc::new(Mutex::new(long_running_child()));
+        *state.active_sidecar.lock().expect("active lock") =
+            Some(child.lock().expect("child lock").id());
+        *state.active_cli_child.lock().expect("child lock") = Some(Arc::clone(&child));
+
+        assert!(cancel_agent(&state).expect("cancel fake CLI"));
+        std::thread::sleep(Duration::from_millis(100));
+        let status = child
+            .lock()
+            .expect("child lock")
+            .wait()
+            .expect("wait for fake CLI");
+
+        assert!(!status.success());
+        assert!(state.active_sidecar.lock().expect("active lock").is_none());
+        assert!(state.active_cli_child.lock().expect("child lock").is_none());
+        assert!(state
+            .sidecar_cancelled
+            .load(std::sync::atomic::Ordering::SeqCst));
+    }
+
+    #[test]
+    fn cancellation_is_a_noop_without_an_active_cli() {
+        let state = test_state();
+        assert!(!cancel_agent(&state).expect("cancel idle state"));
+    }
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "MPAcc Thesis Writer"
+  short_description: "MPAcc thesis drafting and quality checks"
+  default_prompt: "Use $mpacc-thesis-writer to outline and quality-check my MPAcc thesis from my topic, case materials, school requirements, and reference literature."

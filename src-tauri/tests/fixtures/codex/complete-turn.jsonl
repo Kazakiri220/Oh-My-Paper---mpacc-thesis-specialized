@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"thread-abc"}
+{"type":"turn.started"}
+{"type":"item.started","item":{"id":"cmd-1","type":"command_execution","command":"pwd","status":"in_progress"}}
+{"type":"item.completed","item":{"id":"cmd-1","type":"command_execution","aggregated_output":"C:\\paper","exit_code":0,"status":"completed"}}
+{"type":"item.completed","item":{"id":"reasoning-1","type":"reasoning","text":"I checked the project state.","status":"completed"}}
+{"type":"item.completed","item":{"id":"message-1","type":"agent_message","text":"The task is complete.","status":"completed"}}
+{"type":"turn.completed","usage":{"input_tokens":123,"output_tokens":45,"model":"gpt-5.4"}}

@@ -27,11 +27,13 @@ async function main() {
   if (stageTasks.filter(t => t.status === "done").length !== stageTasks.length) return;
 
   const statePath = path.join(PROJECT, ".pipeline", "memory", "orchestrator_state.md");
+  const marker = `<!-- omp-stage-complete:${currentStage}:${stageTasks.length} -->`;
+  if (existsSync(statePath) && readFileSync(statePath, "utf8").includes(marker)) return;
   const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
   await fs.mkdir(path.dirname(statePath), { recursive: true });
   await fs.appendFile(
     statePath,
-    `\n⚠️ [${ts}] 阶段 '${currentStage}' 所有任务已完成，请运行 /omp-plan 评审并决定是否推进。\n`,
+    `\n${marker}\n⚠️ [${ts}] 阶段 '${currentStage}' 所有任务已完成，请运行 $omp-plan 评审并决定是否推进。\n`,
     "utf8"
   );
 
@@ -43,7 +45,7 @@ async function main() {
     "utf8"
   );
 
-  console.log(`✅ Stage '${currentStage}' complete — transition prompt added.`);
 }
 
-main().catch(() => process.exit(0));
+main().then(() => process.stdout.write(JSON.stringify({ continue: true }) + "\n"))
+  .catch(() => process.stdout.write(JSON.stringify({ continue: true }) + "\n"));

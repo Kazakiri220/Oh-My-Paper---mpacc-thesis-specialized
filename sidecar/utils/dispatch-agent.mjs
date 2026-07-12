@@ -193,8 +193,9 @@ function buildAgentCommand(agent, dispatchDir, projectRoot) {
   const taskFile = shellQuote(path.join(dispatchDir, "task.md"));
 
   if (agent === "codex") {
-    // codex --full-auto 模式：无需交互确认
-    return `codex --full-auto -p "$(cat ${taskFile})"`;
+    // Non-interactive Codex reads the complete task from stdin. Keep its
+    // sandbox scoped to the project; never bypass approvals or sandboxing.
+    return `codex exec --sandbox workspace-write - < ${taskFile}`;
   }
 
   if (agent === "claude") {

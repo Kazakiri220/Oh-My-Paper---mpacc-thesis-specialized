@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"thread-failed"}
+{"type":"item.completed","item":{"id":"message-1","type":"agent_message","text":"Partial answer."}}
+{"type":"future.event","value":{"new_field":true}}
+this is not json
+{"type":"turn.failed","error":{"message":"workspace permission denied"}}

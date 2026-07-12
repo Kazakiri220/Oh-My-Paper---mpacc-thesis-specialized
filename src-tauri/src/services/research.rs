@@ -33,14 +33,12 @@ const MEMORY_ORCHESTRATOR_STATE: &str =
     include_str!("../../../templates/research/memory/orchestrator_state.md");
 const MEMORY_EXECUTION_CONTEXT: &str =
     include_str!("../../../templates/research/memory/execution_context.md");
-const MEMORY_REVIEW_LOG: &str =
-    include_str!("../../../templates/research/memory/review_log.md");
+const MEMORY_REVIEW_LOG: &str = include_str!("../../../templates/research/memory/review_log.md");
 
 // ── Harness templates ────────────────────────────────────────────────────────
 const HARNESS_SETTINGS: &str = include_str!("../../../templates/harness/settings.json");
 
-const HARNESS_CMD_DELEGATE: &str =
-    include_str!("../../../templates/harness/commands/delegate.md");
+const HARNESS_CMD_DELEGATE: &str = include_str!("../../../templates/harness/commands/delegate.md");
 const HARNESS_CMD_RESEARCH_PLAN: &str =
     include_str!("../../../templates/harness/commands/research-plan.md");
 const HARNESS_CMD_SURVEY_BLITZ: &str =
@@ -62,8 +60,32 @@ const HARNESS_AGENT_EXP_DRIVER: &str =
     include_str!("../../../templates/harness/agents/experiment-driver.md");
 const HARNESS_AGENT_PAPER_WRITER: &str =
     include_str!("../../../templates/harness/agents/paper-writer.md");
-const HARNESS_AGENT_REVIEWER: &str =
-    include_str!("../../../templates/harness/agents/reviewer.md");
+const HARNESS_AGENT_REVIEWER: &str = include_str!("../../../templates/harness/agents/reviewer.md");
+const CODEX_AGENT_CONDUCTOR: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/agents/conductor.toml");
+const CODEX_AGENT_LIT_SCOUT: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/agents/literature-scout.toml");
+const CODEX_AGENT_EXP_DRIVER: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/agents/experiment-driver.toml");
+const CODEX_AGENT_PAPER_WRITER: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/agents/paper-writer.toml");
+const CODEX_AGENT_REVIEWER: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/agents/reviewer.toml");
+const CODEX_HOOK_SESSION_START: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/scripts/on-session-start.mjs");
+const CODEX_HOOK_TASK_COMPLETE: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/scripts/on-task-complete.mjs");
+const CODEX_HOOK_STAGE_TRANSITION: &str =
+    include_str!("../../../plugins/oh-my-paper-codex/scripts/on-stage-transition.mjs");
+const CODEX_PROJECT_HOOKS: &str = r#"{
+  "description": "Oh My Paper Codex project hooks. Review and trust with /hooks before enabling.",
+  "hooks": {
+    "SessionStart": [{"hooks": [{"type": "command", "command": "node .codex/hooks/on-session-start.mjs", "commandWindows": "node .codex\\hooks\\on-session-start.mjs", "timeout": 10}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": "node .codex/hooks/on-task-complete.mjs", "commandWindows": "node .codex\\hooks\\on-task-complete.mjs", "timeout": 15}]}],
+    "PostToolUse": [{"matcher": "Write|apply_patch", "hooks": [{"type": "command", "command": "node .codex/hooks/on-stage-transition.mjs", "commandWindows": "node .codex\\hooks\\on-stage-transition.mjs", "timeout": 10}]}]
+  }
+}
+"#;
 
 const HARNESS_HOOK_ON_TASK_COMPLETE: &str =
     include_str!("../../../templates/harness/hooks/on-task-complete.mjs");
@@ -140,7 +162,6 @@ struct TemplateBlueprintEntry {
     #[serde(default)]
     artifact_paths: Vec<String>,
 }
-
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -743,10 +764,7 @@ fn load_default_template() -> PipelineTemplate {
 fn load_pipeline_template(brief: Option<&Value>) -> PipelineTemplate {
     // Try to read pipeline.stages from the brief itself
     if let Some(brief_value) = brief {
-        if let Some(stages_value) = brief_value
-            .get("pipeline")
-            .and_then(|p| p.get("stages"))
-        {
+        if let Some(stages_value) = brief_value.get("pipeline").and_then(|p| p.get("stages")) {
             if stages_value.is_object() {
                 if let Ok(stages) =
                     serde_json::from_value::<HashMap<String, TemplateStage>>(stages_value.clone())
@@ -795,10 +813,8 @@ fn generate_pipeline_tasks(
         .unwrap_or(0)
         + 1;
 
-    let existing_stages: BTreeSet<String> = existing_tasks
-        .iter()
-        .map(|t| t.stage.clone())
-        .collect();
+    let existing_stages: BTreeSet<String> =
+        existing_tasks.iter().map(|t| t.stage.clone()).collect();
 
     let mut generated = Vec::new();
 
@@ -912,8 +928,7 @@ fn generate_pipeline_tasks(
                     "Ensure the required element '{readable}' is documented and traceable in the project artifacts."
                 );
                 let task_skills = recommended_skills(stage_name, "exploration");
-                let next_action =
-                    build_next_action_prompt(stage_name, "exploration", &task_skills);
+                let next_action = build_next_action_prompt(stage_name, "exploration", &task_skills);
                 let task_prompt =
                     default_task_prompt(stage_name, &title, &description, &next_action);
                 let dependencies = prev_id.iter().cloned().collect::<Vec<_>>();
@@ -947,8 +962,7 @@ fn generate_pipeline_tasks(
                 let title = format!("{} Quality Gate Review", stage_label(stage_name));
                 let description = ts.quality_gate.clone();
                 let task_skills = recommended_skills(stage_name, "review");
-                let next_action =
-                    build_next_action_prompt(stage_name, "review", &task_skills);
+                let next_action = build_next_action_prompt(stage_name, "review", &task_skills);
                 let task_prompt =
                     default_task_prompt(stage_name, &title, &description, &next_action);
                 let dependencies = prev_id.iter().cloned().collect::<Vec<_>>();
@@ -977,7 +991,6 @@ fn generate_pipeline_tasks(
 
     generated
 }
-
 
 fn default_pipeline_config(start_stage: &str) -> Value {
     json!({
@@ -1045,10 +1058,12 @@ fn write_skill_views(skills_dir: &Path, root: &Path) -> Result<()> {
         lines.join("\n")
     };
 
+    // Codex discovers project Skills from `.agents/skills`; Claude retains
+    // its own view. Do not create `.codex/skills` as a second, drifting
+    // discovery surface.
     for base in [
         root.join(".agents").join("skills"),
         root.join(".claude").join("skills"),
-        root.join(".codex").join("skills"),
     ] {
         fs::create_dir_all(&base)?;
         fs::write(base.join("skills-index.md"), &skills_index)?;
@@ -1078,78 +1093,70 @@ fn write_memory_files(root: &Path) -> Result<()> {
     )?;
     write_if_missing(&memory_dir.join("review_log.md"), MEMORY_REVIEW_LOG)?;
     // Harness memory files
-    write_if_missing(&memory_dir.join("literature_bank.md"), HARNESS_MEM_LITERATURE_BANK)?;
-    write_if_missing(&memory_dir.join("decision_log.md"), HARNESS_MEM_DECISION_LOG)?;
+    write_if_missing(
+        &memory_dir.join("literature_bank.md"),
+        HARNESS_MEM_LITERATURE_BANK,
+    )?;
+    write_if_missing(
+        &memory_dir.join("decision_log.md"),
+        HARNESS_MEM_DECISION_LOG,
+    )?;
     write_if_missing(
         &memory_dir.join("experiment_ledger.md"),
         HARNESS_MEM_EXPERIMENT_LEDGER,
     )?;
-    write_if_missing(&memory_dir.join("agent_handoff.md"), HARNESS_MEM_AGENT_HANDOFF)?;
+    write_if_missing(
+        &memory_dir.join("agent_handoff.md"),
+        HARNESS_MEM_AGENT_HANDOFF,
+    )?;
     Ok(())
 }
 
-/// Write the harness files (slash commands, agent personas, hooks, settings)
-/// into .claude/, .agents/, and .codex/ so every project has the full harness
-/// available from day one.
+/// Write runtime-specific harness views. Claude's commands, Markdown personas,
+/// and settings are not Codex configuration and must not be copied into
+/// `.codex/` under another directory name.
 fn write_harness_files(root: &Path) -> Result<()> {
-    let targets: &[&str] = &[".claude", ".agents", ".codex"];
+    let claude = root.join(".claude");
+    write_if_missing(&claude.join("settings.json"), HARNESS_SETTINGS)?;
 
-    for target_dir_name in targets {
-        let base = root.join(target_dir_name);
+    let cmd_dir = claude.join("commands");
+    fs::create_dir_all(&cmd_dir)?;
+    write_if_missing(&cmd_dir.join("delegate.md"), HARNESS_CMD_DELEGATE)?;
+    write_if_missing(&cmd_dir.join("research-plan.md"), HARNESS_CMD_RESEARCH_PLAN)?;
+    write_if_missing(&cmd_dir.join("survey-blitz.md"), HARNESS_CMD_SURVEY_BLITZ)?;
+    write_if_missing(&cmd_dir.join("idea-forge.md"), HARNESS_CMD_IDEA_FORGE)?;
+    write_if_missing(&cmd_dir.join("experiment-loop.md"), HARNESS_CMD_EXPERIMENT_LOOP)?;
+    write_if_missing(&cmd_dir.join("paper-sprint.md"), HARNESS_CMD_PAPER_SPRINT)?;
+    write_if_missing(&cmd_dir.join("review-gate.md"), HARNESS_CMD_REVIEW_GATE)?;
 
-        // settings.json (only for .claude and .agents)
-        if *target_dir_name == ".claude" || *target_dir_name == ".agents" {
-            write_if_missing(&base.join("settings.json"), HARNESS_SETTINGS)?;
-        }
+    let claude_agents = claude.join("agents");
+    fs::create_dir_all(&claude_agents)?;
+    write_if_missing(&claude_agents.join("conductor.md"), HARNESS_AGENT_CONDUCTOR)?;
+    write_if_missing(&claude_agents.join("literature-scout.md"), HARNESS_AGENT_LIT_SCOUT)?;
+    write_if_missing(&claude_agents.join("experiment-driver.md"), HARNESS_AGENT_EXP_DRIVER)?;
+    write_if_missing(&claude_agents.join("paper-writer.md"), HARNESS_AGENT_PAPER_WRITER)?;
+    write_if_missing(&claude_agents.join("reviewer.md"), HARNESS_AGENT_REVIEWER)?;
 
-        // Slash commands
-        let cmd_dir = base.join("commands");
-        fs::create_dir_all(&cmd_dir)?;
-        write_if_missing(&cmd_dir.join("delegate.md"), HARNESS_CMD_DELEGATE)?;
-        write_if_missing(&cmd_dir.join("research-plan.md"), HARNESS_CMD_RESEARCH_PLAN)?;
-        write_if_missing(&cmd_dir.join("survey-blitz.md"), HARNESS_CMD_SURVEY_BLITZ)?;
-        write_if_missing(&cmd_dir.join("idea-forge.md"), HARNESS_CMD_IDEA_FORGE)?;
-        write_if_missing(
-            &cmd_dir.join("experiment-loop.md"),
-            HARNESS_CMD_EXPERIMENT_LOOP,
-        )?;
-        write_if_missing(&cmd_dir.join("paper-sprint.md"), HARNESS_CMD_PAPER_SPRINT)?;
-        write_if_missing(&cmd_dir.join("review-gate.md"), HARNESS_CMD_REVIEW_GATE)?;
+    let claude_hooks = claude.join("hooks");
+    fs::create_dir_all(&claude_hooks)?;
+    write_if_missing(&claude_hooks.join("on-task-complete.mjs"), HARNESS_HOOK_ON_TASK_COMPLETE)?;
+    write_if_missing(&claude_hooks.join("on-stage-transition.mjs"), HARNESS_HOOK_ON_STAGE_TRANSITION)?;
+    write_if_missing(&claude_hooks.join("on-session-start.mjs"), HARNESS_HOOK_ON_SESSION_START)?;
 
-        // Agent personas
-        let agents_dir = base.join("agents");
-        fs::create_dir_all(&agents_dir)?;
-        write_if_missing(&agents_dir.join("conductor.md"), HARNESS_AGENT_CONDUCTOR)?;
-        write_if_missing(
-            &agents_dir.join("literature-scout.md"),
-            HARNESS_AGENT_LIT_SCOUT,
-        )?;
-        write_if_missing(
-            &agents_dir.join("experiment-driver.md"),
-            HARNESS_AGENT_EXP_DRIVER,
-        )?;
-        write_if_missing(
-            &agents_dir.join("paper-writer.md"),
-            HARNESS_AGENT_PAPER_WRITER,
-        )?;
-        write_if_missing(&agents_dir.join("reviewer.md"), HARNESS_AGENT_REVIEWER)?;
+    let codex_agents = root.join(".codex").join("agents");
+    fs::create_dir_all(&codex_agents)?;
+    write_if_missing(&codex_agents.join("conductor.toml"), CODEX_AGENT_CONDUCTOR)?;
+    write_if_missing(&codex_agents.join("literature-scout.toml"), CODEX_AGENT_LIT_SCOUT)?;
+    write_if_missing(&codex_agents.join("evidence-driver.toml"), CODEX_AGENT_EXP_DRIVER)?;
+    write_if_missing(&codex_agents.join("paper-writer.toml"), CODEX_AGENT_PAPER_WRITER)?;
+    write_if_missing(&codex_agents.join("reviewer.toml"), CODEX_AGENT_REVIEWER)?;
 
-        // Hook scripts
-        let hooks_dir = base.join("hooks");
-        fs::create_dir_all(&hooks_dir)?;
-        write_if_missing(
-            &hooks_dir.join("on-task-complete.mjs"),
-            HARNESS_HOOK_ON_TASK_COMPLETE,
-        )?;
-        write_if_missing(
-            &hooks_dir.join("on-stage-transition.mjs"),
-            HARNESS_HOOK_ON_STAGE_TRANSITION,
-        )?;
-        write_if_missing(
-            &hooks_dir.join("on-session-start.mjs"),
-            HARNESS_HOOK_ON_SESSION_START,
-        )?;
-    }
+    let codex_hooks = root.join(".codex").join("hooks");
+    fs::create_dir_all(&codex_hooks)?;
+    write_if_missing(&codex_hooks.join("on-session-start.mjs"), CODEX_HOOK_SESSION_START)?;
+    write_if_missing(&codex_hooks.join("on-task-complete.mjs"), CODEX_HOOK_TASK_COMPLETE)?;
+    write_if_missing(&codex_hooks.join("on-stage-transition.mjs"), CODEX_HOOK_STAGE_TRANSITION)?;
+    write_if_missing(&root.join(".codex").join("hooks.json"), CODEX_PROJECT_HOOKS)?;
 
     Ok(())
 }
@@ -1227,7 +1234,6 @@ pub fn ensure_research_scaffold(
     write_templates(root)?;
     write_memory_files(root)?;
     write_harness_files(root)?;
-    copy_bundled_skill_set(skills_dir, &root.join("skills"))?;
     write_skill_views(skills_dir, root)?;
 
     let project_title = root
@@ -1936,6 +1942,49 @@ mod tests {
     }
 
     #[test]
+    fn scaffold_generates_native_codex_agents_without_codex_skill_duplicates() {
+        let root = make_temp_project("codex-native-layout");
+        let app_root = make_app_root();
+        ensure_research_scaffold(&app_root, &root, Some("survey")).expect("scaffold");
+
+        for agent_file in [
+            "conductor.toml",
+            "literature-scout.toml",
+            "evidence-driver.toml",
+            "paper-writer.toml",
+            "reviewer.toml",
+        ] {
+            let agent = fs::read_to_string(root.join(".codex/agents").join(agent_file))
+                .unwrap_or_else(|_| panic!("Codex agent template {agent_file}"));
+            assert!(agent.contains("name = \""), "missing name in {agent_file}");
+            assert!(
+                agent.contains("developer_instructions = \"\"\""),
+                "missing developer instructions in {agent_file}"
+            );
+            assert_eq!(
+                agent.matches("\"\"\"").count(),
+                2,
+                "unbalanced developer instructions in {agent_file}"
+            );
+        }
+        assert!(root.join(".agents/skills").is_dir());
+        assert!(!root.join(".codex/skills").exists());
+        assert!(!root.join(".codex/agents/conductor.md").exists());
+
+        let hooks: Value = serde_json::from_str(
+            &fs::read_to_string(root.join(".codex/hooks.json")).expect("Codex hook config"),
+        )
+        .expect("valid Codex hook JSON");
+        assert!(hooks["hooks"]["SessionStart"][0]["hooks"][0]["commandWindows"]
+            .as_str()
+            .is_some());
+        assert_eq!(
+            hooks["hooks"]["PostToolUse"][0]["matcher"].as_str(),
+            Some("Write|apply_patch")
+        );
+    }
+
+    #[test]
     fn publication_points_to_project_root() {
         let root = make_temp_project("research-instance");
         let app_root = make_app_root();
@@ -2063,21 +2112,40 @@ mod tests {
     fn template_loads_and_generates_survey_tasks() {
         // Test 1: built-in template loads
         let template = load_default_template();
-        assert!(template.stages.contains_key("survey"), "template must contain survey stage");
+        assert!(
+            template.stages.contains_key("survey"),
+            "template must contain survey stage"
+        );
         let survey = &template.stages["survey"];
-        assert!(!survey.task_blueprints.is_empty(), "survey must have blueprints");
+        assert!(
+            !survey.task_blueprints.is_empty(),
+            "survey must have blueprints"
+        );
 
         // Test 2: generate tasks from template
         let tasks = generate_pipeline_tasks(&template, "survey", &[]);
-        assert!(!tasks.is_empty(), "should generate at least one task for survey (got {} tasks)", tasks.len());
-        assert!(tasks.iter().any(|t| t.stage == "survey"), "should have survey tasks");
+        assert!(
+            !tasks.is_empty(),
+            "should generate at least one task for survey (got {} tasks)",
+            tasks.len()
+        );
+        assert!(
+            tasks.iter().any(|t| t.stage == "survey"),
+            "should have survey tasks"
+        );
 
         // Test 3: round-trip through brief serialization
         let brief = default_research_brief("test", "survey");
         let template_from_brief = load_pipeline_template(Some(&brief));
-        assert!(template_from_brief.stages.contains_key("survey"), "brief must round-trip survey stage");
+        assert!(
+            template_from_brief.stages.contains_key("survey"),
+            "brief must round-trip survey stage"
+        );
         let brief_survey = &template_from_brief.stages["survey"];
-        assert!(!brief_survey.task_blueprints.is_empty(), "brief survey must have blueprints on round-trip");
+        assert!(
+            !brief_survey.task_blueprints.is_empty(),
+            "brief survey must have blueprints on round-trip"
+        );
     }
 
     #[test]
@@ -2137,7 +2205,10 @@ mod tests {
 
         // Get the second generated task ID
         let initial_snapshot = load_research_snapshot(&root).expect("initial snapshot");
-        assert!(initial_snapshot.tasks.len() >= 2, "should have at least 2 survey tasks");
+        assert!(
+            initial_snapshot.tasks.len() >= 2,
+            "should have at least 2 survey tasks"
+        );
         let second_task_id = initial_snapshot.tasks[1].id.clone();
 
         apply_task_suggestion(

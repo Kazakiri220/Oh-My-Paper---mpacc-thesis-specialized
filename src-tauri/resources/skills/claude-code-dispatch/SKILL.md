@@ -24,7 +24,7 @@ primaryIntent: Invoke Claude Code as a sub-agent for complex coding tasks
 ## 调用方式
 
 ```bash
-claude --print --dangerously-skip-permissions \
+claude --print \
   --model claude-opus-4-6 \
   -p "<详细任务描述，包含上下文、文件路径、预期结果>" \
   --cwd {baseDir}
@@ -40,7 +40,7 @@ claude --print --dangerously-skip-permissions \
 
 ```bash
 # 优化数据加载器性能
-claude --print --dangerously-skip-permissions \
+claude --print \
   -p "优化 src/data/loader.py 中的 DataLoader 类，当前加载 10GB 数据集需要 5 分钟，目标是减少到 1 分钟以内。可以考虑使用 memory mapping、多进程预加载、或更高效的序列化格式。" \
   --cwd {baseDir}
 ```

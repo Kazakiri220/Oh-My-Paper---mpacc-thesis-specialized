@@ -1,7 +1,9 @@
 use std::path::Path;
 
 pub mod agent;
+pub mod cc_connect;
 pub mod cli_agent;
+pub mod codex_jsonl;
 pub mod compile;
 pub mod compute_node;
 pub mod experiment;
@@ -11,13 +13,12 @@ pub mod profile;
 pub mod project;
 pub mod provider;
 pub mod research;
+pub mod session_scan;
 pub mod sidecar;
 pub mod skill;
 pub mod sync;
-pub mod terminal;
-pub mod cc_connect;
-pub mod session_scan;
 pub mod task_watcher;
+pub mod terminal;
 pub mod worker;
 
 /// Build a PATH string that includes common TeX installation directories.
@@ -32,10 +33,10 @@ pub(crate) fn enriched_path() -> String {
         // Common CLI tool locations (Claude Code installs to ~/.local/bin)
         if let Some(home) = dirs::home_dir() {
             for sub in [
-                ".local/bin",        // Claude Code CLI
-                ".npm/bin",          // npm global binaries
-                ".volta/bin",        // Volta-managed Node
-                ".cargo/bin",        // Cargo binaries
+                ".local/bin", // Claude Code CLI
+                ".npm/bin",   // npm global binaries
+                ".volta/bin", // Volta-managed Node
+                ".cargo/bin", // Cargo binaries
             ] {
                 let dir = home.join(sub);
                 let s = dir.to_string_lossy().to_string();
@@ -104,6 +105,25 @@ pub(crate) fn enriched_path() -> String {
 
     #[cfg(target_os = "linux")]
     {
+        // Desktop launchers often inherit a minimal PATH. Include common
+        // per-user CLI locations so npm-installed Codex and Claude clients
+        // remain discoverable outside an interactive shell.
+        if let Some(home) = dirs::home_dir() {
+            for sub in [
+                ".local/bin",
+                ".npm/bin",
+                ".npm-global/bin",
+                ".volta/bin",
+                ".cargo/bin",
+            ] {
+                let dir = home.join(sub);
+                let s = dir.to_string_lossy().to_string();
+                if dir.is_dir() && !current.contains(&s) {
+                    extra.push(s);
+                }
+            }
+        }
+
         for dir in ["/usr/local/bin", "/usr/bin"] {
             if Path::new(dir).is_dir() && !current.contains(dir) {
                 extra.push(dir.to_string());

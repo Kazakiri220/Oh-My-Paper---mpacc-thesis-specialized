@@ -104,7 +104,10 @@ pub fn scan_all_sessions() -> Vec<SessionMeta> {
 }
 
 /// Load messages for a specific session.
-pub fn load_session_messages(provider: &str, session_id: &str) -> Result<Vec<SessionMessage>, String> {
+pub fn load_session_messages(
+    provider: &str,
+    session_id: &str,
+) -> Result<Vec<SessionMessage>, String> {
     match provider {
         "claude" => load_claude_session_messages(session_id),
         "codex" => load_codex_session_messages(session_id),
@@ -116,7 +119,7 @@ pub fn load_session_messages(provider: &str, session_id: &str) -> Result<Vec<Ses
 pub fn get_resume_command(provider: &str, session_id: &str, project_dir: Option<&str>) -> String {
     let resume_cmd = match provider {
         "claude" => format!("claude --resume {}", session_id),
-        "codex" => format!("codex --resume {}", session_id),
+        "codex" => format!("codex exec resume {}", session_id),
         _ => format!("echo 'Unknown provider: {}'", provider),
     };
 
@@ -135,8 +138,8 @@ fn claude_projects_dir() -> Option<PathBuf> {
 }
 
 fn scan_claude_sessions() -> Result<Vec<SessionMeta>, String> {
-    let projects_dir = claude_projects_dir()
-        .ok_or_else(|| "cannot resolve home directory".to_string())?;
+    let projects_dir =
+        claude_projects_dir().ok_or_else(|| "cannot resolve home directory".to_string())?;
 
     if !projects_dir.is_dir() {
         return Ok(Vec::new());
@@ -154,7 +157,11 @@ fn scan_claude_sessions() -> Result<Vec<SessionMeta>, String> {
         }
 
         let project_dir = decode_claude_project_dir(
-            project_path.file_name().unwrap_or_default().to_str().unwrap_or(""),
+            project_path
+                .file_name()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or(""),
         );
 
         let jsonl_files = match fs::read_dir(&project_path) {
@@ -282,9 +289,7 @@ fn parse_claude_session_meta(
         .map(|m| truncate_text(m, 120))
         .unwrap_or_default();
 
-    let effective_dir = cwd
-        .clone()
-        .unwrap_or_else(|| project_dir.to_string());
+    let effective_dir = cwd.clone().unwrap_or_else(|| project_dir.to_string());
 
     let role_tag = infer_role_tag(&user_messages, &assistant_messages);
 
@@ -307,14 +312,14 @@ fn parse_claude_session_meta(
 }
 
 fn load_claude_session_messages(session_id: &str) -> Result<Vec<SessionMessage>, String> {
-    let projects_dir = claude_projects_dir()
-        .ok_or_else(|| "cannot resolve home directory".to_string())?;
+    let projects_dir =
+        claude_projects_dir().ok_or_else(|| "cannot resolve home directory".to_string())?;
 
     // Find the JSONL file across all project directories
     let file_path = find_claude_session_file(&projects_dir, session_id)?;
 
-    let file = fs::File::open(&file_path)
-        .map_err(|e| format!("failed to open session file: {e}"))?;
+    let file =
+        fs::File::open(&file_path).map_err(|e| format!("failed to open session file: {e}"))?;
     let reader = BufReader::new(file);
 
     let mut messages = Vec::new();
@@ -362,10 +367,7 @@ fn load_claude_session_messages(session_id: &str) -> Result<Vec<SessionMessage>,
             }
         }
 
-        let timestamp = entry
-            .timestamp
-            .as_deref()
-            .and_then(parse_timestamp);
+        let timestamp = entry.timestamp.as_deref().and_then(parse_timestamp);
 
         let tool_id = entry.parent_tool_use_id.clone();
 
@@ -448,8 +450,7 @@ fn codex_home_dir() -> Option<PathBuf> {
 }
 
 fn scan_codex_sessions() -> Result<Vec<SessionMeta>, String> {
-    let codex_dir = codex_home_dir()
-        .ok_or_else(|| "cannot resolve home directory".to_string())?;
+    let codex_dir = codex_home_dir().ok_or_else(|| "cannot resolve home directory".to_string())?;
 
     let index_path = codex_dir.join("session_index.jsonl");
     if !index_path.is_file() {
@@ -505,8 +506,7 @@ fn scan_codex_sessions() -> Result<Vec<SessionMeta>, String> {
 }
 
 fn load_codex_session_messages(session_id: &str) -> Result<Vec<SessionMessage>, String> {
-    let codex_dir = codex_home_dir()
-        .ok_or_else(|| "cannot resolve home directory".to_string())?;
+    let codex_dir = codex_home_dir().ok_or_else(|| "cannot resolve home directory".to_string())?;
 
     // Search in sessions/ and archived_sessions/
     let sessions_dir = codex_dir.join("sessions");
@@ -515,8 +515,8 @@ fn load_codex_session_messages(session_id: &str) -> Result<Vec<SessionMessage>, 
     let file_path = find_codex_session_file(&sessions_dir, session_id)
         .or_else(|_| find_codex_session_file(&archived_dir, session_id))?;
 
-    let file = fs::File::open(&file_path)
-        .map_err(|e| format!("failed to open codex session: {e}"))?;
+    let file =
+        fs::File::open(&file_path).map_err(|e| format!("failed to open codex session: {e}"))?;
     let reader = BufReader::new(file);
 
     let mut messages = Vec::new();
@@ -616,23 +616,65 @@ fn infer_role_from_text(text: &str) -> String {
 
     // Orchestrator keywords (planning, coordination, architecture)
     let orchestrator_keywords = [
-        "plan", "architect", "design", "orchestrat", "coordinate",
-        "strategy", "refactor", "restructur", "scaffold", "blueprint",
-        "统筹", "规划", "架构", "设计", "重构", "协调",
+        "plan",
+        "architect",
+        "design",
+        "orchestrat",
+        "coordinate",
+        "strategy",
+        "refactor",
+        "restructur",
+        "scaffold",
+        "blueprint",
+        "统筹",
+        "规划",
+        "架构",
+        "设计",
+        "重构",
+        "协调",
     ];
 
     // Executor keywords (implementation, fixing, specific tasks)
     let executor_keywords = [
-        "implement", "fix", "debug", "build", "deploy", "compile",
-        "install", "configure", "migrate", "test", "error", "bug",
-        "实现", "修复", "调试", "部署", "编译", "安装", "配置",
+        "implement",
+        "fix",
+        "debug",
+        "build",
+        "deploy",
+        "compile",
+        "install",
+        "configure",
+        "migrate",
+        "test",
+        "error",
+        "bug",
+        "实现",
+        "修复",
+        "调试",
+        "部署",
+        "编译",
+        "安装",
+        "配置",
     ];
 
     // Research keywords
     let research_keywords = [
-        "research", "paper", "thesis", "manuscript", "literature",
-        "experiment", "survey", "analysis", "review", "citation",
-        "研究", "论文", "综述", "实验", "分析", "文献",
+        "research",
+        "paper",
+        "thesis",
+        "manuscript",
+        "literature",
+        "experiment",
+        "survey",
+        "analysis",
+        "review",
+        "citation",
+        "研究",
+        "论文",
+        "综述",
+        "实验",
+        "分析",
+        "文献",
     ];
 
     let orchestrator_score: usize = orchestrator_keywords
@@ -718,9 +760,18 @@ mod tests {
 
     #[test]
     fn test_infer_role_from_text() {
-        assert_eq!(infer_role_from_text("please implement the login page"), "executor");
-        assert_eq!(infer_role_from_text("plan the architecture for the new system"), "orchestrator");
-        assert_eq!(infer_role_from_text("help me research papers on reinforcement learning"), "research");
+        assert_eq!(
+            infer_role_from_text("please implement the login page"),
+            "executor"
+        );
+        assert_eq!(
+            infer_role_from_text("plan the architecture for the new system"),
+            "orchestrator"
+        );
+        assert_eq!(
+            infer_role_from_text("help me research papers on reinforcement learning"),
+            "research"
+        );
         assert_eq!(infer_role_from_text("hello how are you"), "general");
     }
 
@@ -744,6 +795,6 @@ mod tests {
         assert!(cmd.contains("cd"));
 
         let cmd_no_dir = get_resume_command("codex", "xyz789", None);
-        assert_eq!(cmd_no_dir, "codex --resume xyz789");
+        assert_eq!(cmd_no_dir, "codex exec resume xyz789");
     }
 }

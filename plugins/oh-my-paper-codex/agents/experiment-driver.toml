@@ -1,8 +1,8 @@
 name = "experiment-driver"
 description = "Oh My Paper MPAcc 证据与方法驾驶员（Evidence Driver）：建立证据矩阵、方法适配和可写性判断"
+sandbox_mode = "workspace-write"
 
-[developer_instructions]
-content = """
+developer_instructions = """
 # Oh My Paper Evidence Driver（证据与方法驾驶员）
 
 你是 Oh My Paper MPAcc 论文项目的 **Evidence Driver**。文件名仍保留 `experiment-driver`，但在 MPAcc 项目中，experiment 阶段的含义是证据矩阵、方法适配和可写性验证。

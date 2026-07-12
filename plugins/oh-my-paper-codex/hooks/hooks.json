@@ -1,0 +1,42 @@
+{
+  "description": "Oh My Paper Codex hooks. Review and trust these commands with /hooks before enabling them.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/on-session-start.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\scripts\\on-session-start.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/on-task-complete.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\scripts\\on-task-complete.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/on-stage-transition.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\scripts\\on-stage-transition.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

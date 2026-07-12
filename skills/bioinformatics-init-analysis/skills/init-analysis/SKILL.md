@@ -96,10 +96,10 @@ Generate HTML report with embedded figures and interpretations. Two styles:
 ## Reference Files
 
 For detailed guidance, consult:
-- **`references/plot_interpretation_guide.md`** - How to explain each plot type to non-experts
-- **`references/cytof_specifics.md`** - CyTOF-specific QC, normalization, and markers
-- **`references/scrnaseq_specifics.md`** - scRNA-seq-specific processing details
-- **`references/statistical_methods.md`** - Plain-language glossary of statistical methods
+- **`../../references/plot_interpretation_guide.md`** - How to explain each plot type to non-experts
+- **`../../references/cytof_specifics.md`** - CyTOF-specific QC, normalization, and markers
+- **`../../references/scrnaseq_specifics.md`** - scRNA-seq-specific processing details
+- **`../../references/statistical_methods.md`** - Plain-language glossary of statistical methods
 
 ## Important Notes
 

@@ -398,19 +398,19 @@ Oh My Paper - mpacc-thesis-specialized also ships a **Codex plugin** (`oh-my-pap
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git /tmp/oh-my-paper-mpacc
-cd /tmp/oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git ~/oh-my-paper-mpacc
+cd ~/oh-my-paper-mpacc
 
 # 2. One-command install
-./scripts/install-codex-plugin.sh
+sh ./scripts/install-codex-plugin.sh
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
 # 1. Clone the repo
-git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git $env:TEMP\oh-my-paper-mpacc
-Set-Location $env:TEMP\oh-my-paper-mpacc
+git clone https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized.git "$HOME\oh-my-paper-mpacc"
+Set-Location "$HOME\oh-my-paper-mpacc"
 
 # 2. One-command install
 powershell -ExecutionPolicy Bypass -File .\scripts\install-codex-plugin.ps1
@@ -418,12 +418,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-codex-plugin.ps1
 
 What the installer does:
 
-- Copies the plugin to `~/plugins/oh-my-paper-codex`
-- Creates or updates `~/.agents/plugins/marketplace.json`
-- Tries to call Codex directly so the plugin becomes installed and enabled immediately
-- Uses `node` under the hood, so make sure `node` is available on your `PATH`
+- Checks the essential plugin manifest, workflow Skill, and hook files, then calls stable `codex plugin marketplace` and `codex plugin` subcommands.
+- Adds the repository marketplace and installs `oh-my-paper-codex` without overwriting unrelated marketplaces or plugins.
+- Uses `node` under the hood; make sure both `node` and `codex` are available on your `PATH`.
 
-If `codex` is not available on your `PATH`, the script still registers the plugin and then tells you to finish the last step in Codex's Plugins page. If you search there, search for `Oh My Paper - mpacc-thesis-specialized` or `oh-my-paper-codex`, not `omp`.
+Keep this clone while the plugin is installed: it is the local marketplace source. To inspect, upgrade, or remove the plugin, run `node scripts/manage-codex-plugin.mjs status`, pull updates and rerun the installer, or use the matching uninstall script. The installer reports marketplace visibility, installation state, packaged Skills, and hook-trust status separately.
 
 ### Use in Codex CLI
 
@@ -434,32 +433,36 @@ cd /path/to/your/mpacc-thesis-project
 codex
 ```
 
-Then use one of these two patterns:
+First verify that `/skills` shows the OMP Skills, then invoke them by name:
 
-- Ask naturally, for example: `Use Oh My Paper - mpacc-thesis-specialized to initialize this MPAcc thesis project and scaffold .pipeline/`
-- Reuse the workflow prompt templates under `plugins/oh-my-paper-codex/prompts/` by copying or adapting them inside the Codex session
+- `$omp-setup` — initialize or repair the thesis-project scaffold.
+- `$omp-sync` — reconcile `.pipeline` state and select the next task.
+- `$omp-plan`, `$omp-survey`, `$omp-ideate`, `$omp-experiment`, `$omp-write`, `$omp-review`, `$omp-delegate` — run the matching workflow.
+- Natural language is also supported, for example: `Synchronize this thesis project's progress and recommend the next evidence-grounded task.`
 
-Codex CLI does **not** currently auto-register the files in `plugins/oh-my-paper-codex/prompts/` as slash commands, so `/omp-setup` and similar commands will **not** appear in the CLI command palette.
+Native Codex names use hyphens: `$omp-sync`, not `$omp:sync`. Oh My Paper's own chat UI may accept the colon form as a compatibility input, but native Codex does not.
+
+Use `/hooks` to inspect and explicitly trust the OMP hooks before relying on SessionStart, Stop, or PostToolUse behavior. Hooks are never enabled by a bypass flag.
 
 ### What's Included
 
 | Feature | Claude Code | Codex CLI |
 |:---|:---|:---|
 | Agent Roles (5) | `agents/*.md` | `agents/*.toml` |
-| Workflow entrypoints | `/omp:...` slash commands | Natural-language prompts + `prompts/*.md` templates |
-| SessionStart Hook | Native hook | `AGENTS.md` (auto-read) |
-| Skills (34) | ✅ shared | ✅ shared |
+| Workflow entrypoints | `/omp:...` slash commands | `$omp-*` Skill mentions + natural language |
+| SessionStart Hook | Native hook | Native hook after `/hooks` trust |
+| Skills | ✅ shared | 9 OMP workflows + 6 curated core Skills |
 | `.pipeline/` Memory | ✅ | ✅ |
 | Codex Delegation | `/omp:delegate` → new terminal | Native `/agent` subagent |
 
 ### Key Differences
 
-- **Hooks**: Codex doesn't have native hooks. The `SessionStart` equivalent is handled by `AGENTS.md` which Codex reads automatically. Stage transition detection is embedded in the agent instructions.
-- **CLI command model**: Claude Code exposes `/omp:...` slash commands. Codex CLI currently does not auto-register the plugin's `prompts/*.md` files as `/omp-*` slash commands, so you use natural-language prompts or copy/adapt the templates manually.
+- **Hooks**: Codex supports native project and bundled hooks. Review them with `/hooks` and trust only the copies you have inspected; `AGENTS.md` remains durable project guidance, not a hook replacement.
+- **CLI command model**: Claude Code exposes `/omp:...` slash commands. Codex uses `$omp-*` Skill mentions; `$omp:...` is only an optional Oh My Paper UI compatibility input.
 - **Both can coexist**: The Codex plugin (`plugins/oh-my-paper-codex/`) is completely separate from the Claude Code plugin (`plugins/oh-my-paper/`). Installing one does not affect the other.
-- **Installer scripts**: Use `scripts/install-codex-plugin.sh` on macOS/Linux or `scripts/install-codex-plugin.ps1` on Windows. They merge the marketplace entry instead of overwriting your existing local plugins.
-- **Codex discovery**: Codex expects a valid `~/.agents/plugins/marketplace.json` entry plus a plugin directory under `~/plugins/<plugin-name>/`. Copying files only into `~/.codex/plugins/` is not enough for the plugin UI to discover it.
-- **Codex install state**: A marketplace entry only makes the plugin appear in the Plugins page. You must still install it there before it becomes enabled and usable.
+- **Installer scripts**: Use `sh scripts/install-codex-plugin.sh` on macOS/Linux or `scripts/install-codex-plugin.ps1` on Windows. They install only this repository's marketplace/plugin and do not overwrite unrelated plugins.
+- **Codex discovery**: The installer uses `codex plugin marketplace add` and `codex plugin add`; use `codex plugin list --available --json` to diagnose marketplace and installation state.
+- **Fresh installation**: Validate `/skills` in a new session and `/hooks` after trust. The normal test suite uses a fake CLI and never spends model credits.
 
 ---
 
@@ -470,15 +473,27 @@ Codex CLI does **not** currently auto-register the files in `plugins/oh-my-paper
 /plugin uninstall omp@oh-my-paper
 ```
 
-**Codex on macOS / Linux:**
+**Codex (any platform):**
+
 ```bash
-./scripts/uninstall-codex-plugin.sh
+codex plugin remove oh-my-paper-codex@oh-my-paper-codex
 ```
 
-**Codex on Windows (PowerShell):**
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-codex-plugin.ps1
+This removes the plugin and leaves its marketplace configured, which makes a later reinstall straightforward.
+
+**Codex complete cleanup from the local clone (macOS / Linux):**
+
+```bash
+sh ./scripts/uninstall-codex-plugin.sh --remove-marketplace
 ```
+
+**Codex complete cleanup from the local clone (Windows / PowerShell):**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-codex-plugin.ps1 --remove-marketplace
+```
+
+The complete-cleanup option removes the marketplace only when it does not provide any other plugins; otherwise it stops safely. Omit `--remove-marketplace` to retain the marketplace.
 
 ---
 

@@ -1,124 +1,112 @@
 {
   "survey": {
     "base": [
+      "mpacc-thesis-writer",
       "inno-deep-research",
-      "gemini-deep-research",
       "academic-researcher",
-      "dataset-discovery",
-      "biorxiv-database"
+      "paper-finder",
+      "paper-analyzer"
     ],
     "byTaskType": {
       "analysis": [
+        "mpacc-thesis-writer",
         "inno-deep-research",
-        "gemini-deep-research",
-        "academic-researcher"
+        "academic-researcher",
+        "paper-analyzer"
       ],
       "exploration": [
+        "mpacc-thesis-writer",
         "inno-deep-research",
-        "gemini-deep-research",
-        "dataset-discovery",
-        "biorxiv-database",
-        "academic-researcher"
+        "academic-researcher",
+        "paper-finder"
       ]
     }
   },
   "ideation": {
     "base": [
-      "inno-pipeline-planner",
-      "inno-prepare-resources",
-      "inno-deep-research",
-      "dataset-discovery",
-      "inno-idea-generation",
-      "inno-idea-eval",
-      "biorxiv-database",
-      "academic-researcher"
+      "research-pipeline-planner",
+      "research-idea-convergence",
+      "mpacc-thesis-writer",
+      "inno-pipeline-planner"
     ],
     "byTaskType": {
       "analysis": [
-        "inno-idea-generation",
-        "inno-idea-eval",
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
         "inno-deep-research",
         "academic-researcher"
       ],
       "exploration": [
-        "inno-idea-generation",
-        "inno-code-survey",
-        "inno-deep-research",
-        "dataset-discovery",
-        "biorxiv-database",
-        "academic-researcher"
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
+        "inno-deep-research"
       ],
       "implementation": [
-        "inno-prepare-resources"
+        "inno-pipeline-planner"
       ]
     }
   },
   "experiment": {
     "base": [
-      "inno-code-survey",
-      "dataset-discovery",
-      "inno-experiment-dev",
-      "inno-experiment-analysis",
-      "bioinformatics-init-analysis"
+      "mpacc-thesis-writer",
+      "research-pipeline-planner",
+      "inno-pipeline-planner"
     ],
     "byTaskType": {
-      "implementation": [
-        "inno-experiment-dev",
-        "bioinformatics-init-analysis"
-      ],
       "analysis": [
-        "inno-experiment-analysis",
-        "bioinformatics-init-analysis"
+        "mpacc-thesis-writer",
+        "research-pipeline-planner"
       ],
       "exploration": [
-        "inno-code-survey",
-        "dataset-discovery",
+        "mpacc-thesis-writer",
         "inno-deep-research",
-        "biorxiv-database"
+        "academic-researcher"
+      ],
+      "implementation": [
+        "inno-pipeline-planner",
+        "mpacc-thesis-writer"
       ]
     }
   },
   "publication": {
     "base": [
       "inno-paper-writing",
-      "inno-figure-gen",
+      "mpacc-thesis-writer",
       "inno-paper-reviewer",
       "inno-reference-audit",
-      "inno-rclone-to-overleaf",
-      "scientific-writing",
-      "ml-paper-writing",
-      "inno-grant-proposal"
+      "inno-figure-gen"
     ],
     "byTaskType": {
       "writing": [
         "inno-paper-writing",
-        "inno-figure-gen",
-        "scientific-writing",
-        "ml-paper-writing",
-        "inno-grant-proposal"
+        "mpacc-thesis-writer",
+        "inno-figure-gen"
       ],
       "analysis": [
         "inno-paper-reviewer",
-        "inno-reference-audit",
-        "inno-deep-research"
+        "mpacc-thesis-writer",
+        "inno-reference-audit"
       ],
       "delivery": [
-        "inno-rclone-to-overleaf"
+        "mpacc-thesis-writer"
       ]
     }
   },
   "promotion": {
     "base": [
+      "mpacc-thesis-writer",
       "making-academic-presentations"
     ],
     "byTaskType": {
       "scripting": [
+        "mpacc-thesis-writer",
         "making-academic-presentations"
       ],
       "rendering": [
         "making-academic-presentations"
       ],
       "narration": [
+        "mpacc-thesis-writer",
         "making-academic-presentations"
       ],
       "delivery": [

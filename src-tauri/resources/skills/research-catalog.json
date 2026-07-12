@@ -7,6 +7,57 @@
   },
   "skills": [
     {
+      "id": "literature-pdf-ocr-library",
+      "name": "literature-pdf-ocr-library",
+      "version": "1.0.0",
+      "description": "Search traceable academic papers, download open-access PDFs from arXiv, convert to Markdown via PaddleOCR API or pdfminer fallback, and organize into a structured literature corpus.",
+      "summary": "Downloads real papers by arXiv ID or query, OCR-converts PDFs to readable Markdown, and stores them in .pipeline/literature/<corpus>/. Use when you need actual paper content for literature review or idea generation — not just metadata.",
+      "stages": [
+        "survey",
+        "ideation"
+      ],
+      "tools": [
+        "bash",
+        "read_file",
+        "write_file"
+      ],
+      "primaryIntent": "research",
+      "intents": [
+        "research",
+        "analysis"
+      ],
+      "capabilities": [
+        "pdf-download",
+        "ocr",
+        "search-retrieval"
+      ],
+      "domains": [
+        "cs-ai",
+        "general"
+      ],
+      "keywords": [
+        "literature",
+        "pdf",
+        "ocr",
+        "arxiv",
+        "download",
+        "corpus",
+        "papers",
+        "pdfminer",
+        "paddleocr",
+        "survey"
+      ],
+      "source": "local",
+      "status": "verified",
+      "resourceFlags": {
+        "hasReferences": true,
+        "hasScripts": true,
+        "hasTemplates": false,
+        "hasAssets": false,
+        "hasAgents": false
+      }
+    },
+    {
       "id": "academic-researcher",
       "name": "academic-researcher",
       "version": "1.0.0",
@@ -855,8 +906,8 @@
       "id": "inno-paper-reviewer",
       "name": "inno-paper-reviewer",
       "version": "1.0.0",
-      "description": "Structured manuscript/grant review with checklist-based evaluation.",
-      "summary": "Structured manuscript/grant review with checklist-based evaluation. Use when writing formal peer reviews with specific criteria methodology assessment, statistical validity, reporting standards compliance (CONSORT/STROBE), and constructive...",
+      "description": "Use when reviewing MPAcc thesis topics, proposals, outlines, chapters, citations, revisions, or defense materials for standards compliance and logical risk.",
+      "summary": "MPAcc thesis review wrapper. Checks topic standards, evidence boundary, problem-cause-solution logic, method-data fit, citation integrity, and writing quality using mpacc-thesis-writer references.",
       "stages": [
         "publication"
       ],
@@ -871,26 +922,25 @@
         "writing"
       ],
       "capabilities": [
-        "evaluation-benchmarking"
+        "evaluation-benchmarking",
+        "research-planning"
       ],
       "domains": [
-        "general"
+        "accounting",
+        "mpacc",
+        "management"
       ],
       "keywords": [
-        "inno-paper-reviewer",
-        "paper review",
-        "evaluation-benchmarking",
-        "inno",
-        "paper",
-        "reviewer",
-        "structured",
-        "manuscript",
-        "grant",
-        "review",
-        "checklist",
-        "based"
+        "mpacc",
+        "会计专硕",
+        "论文审查",
+        "选题审查",
+        "开题审查",
+        "质量检查",
+        "citation audit",
+        "advisor feedback"
       ],
-      "source": "builtin",
+      "source": "local",
       "status": "verified",
       "upstream": {
         "repo": "dr-claw",
@@ -920,8 +970,8 @@
       "id": "inno-paper-writing",
       "name": "inno-paper-writing",
       "version": "1.0.0",
-      "description": "Creates formal academic research papers following IEEE/ACM formatting standards with proper structure, citations, and scholarly writing style.",
-      "summary": "Creates formal academic research papers following IEEE/ACM formatting standards with proper structure, citations, and scholarly writing style. Use when the user asks to write a research paper, academic paper, or conference paper on any top...",
+      "description": "Use when drafting, structuring, or revising MPAcc thesis deliverables, including proposal, literature review, outline, chapters, and final manuscript text.",
+      "summary": "MPAcc thesis writing wrapper for Oh-my--paper. Routes thesis writing work to mpacc-thesis-writer while preserving Oh-my--paper publication-stage commands.",
       "stages": [
         "publication"
       ],
@@ -933,29 +983,29 @@
       "primaryIntent": "writing",
       "intents": [
         "writing",
-        "research"
+        "research",
+        "evaluation"
       ],
       "capabilities": [
-        "visualization-reporting"
+        "visualization-reporting",
+        "research-planning"
       ],
       "domains": [
-        "general"
+        "accounting",
+        "mpacc",
+        "management"
       ],
       "keywords": [
-        "inno-paper-writing",
-        "paper writing",
-        "visualization-reporting",
-        "inno",
-        "paper",
-        "writing",
-        "creates",
-        "formal",
-        "academic",
-        "research",
-        "papers",
-        "following"
+        "mpacc",
+        "会计专硕",
+        "毕业论文",
+        "开题报告",
+        "文献综述",
+        "案例分析",
+        "论文正文",
+        "chapter drafting"
       ],
-      "source": "builtin",
+      "source": "local",
       "status": "verified",
       "upstream": {
         "repo": "dr-claw",
@@ -985,8 +1035,8 @@
       "id": "inno-pipeline-planner",
       "name": "inno-pipeline-planner",
       "version": "1.0.0",
-      "description": "Guides the user through an interactive conversation to define their research project, then generates research_brief.json and tasks.json.",
-      "summary": "Guides the user through an interactive conversation to define their research project, then generates research_brief.json and tasks.json. Use when starting a new project, when no research_brief.json exists, when the user wants to start from...",
+      "description": "Use when creating or updating Oh-my--paper pipeline files for an MPAcc thesis project under research-pipeline-planner control.",
+      "summary": "Generates research_brief.json and tasks.json for MPAcc thesis projects, using research-pipeline-planner as controller and mpacc-thesis-writer as the domain standard.",
       "stages": [
         "ideation"
       ],
@@ -998,30 +1048,27 @@
       "primaryIntent": "research",
       "intents": [
         "research",
-        "experiment"
+        "writing"
       ],
       "capabilities": [
         "research-planning",
         "agent-workflow"
       ],
       "domains": [
-        "general"
+        "accounting",
+        "mpacc"
       ],
       "keywords": [
-        "inno-pipeline-planner",
-        "research-planning",
-        "agent-workflow",
-        "inno",
+        "mpacc",
+        "会计专硕",
         "pipeline",
-        "planner",
-        "guides",
-        "user",
-        "through",
-        "interactive",
-        "conversation",
-        "define"
+        "research brief",
+        "tasks",
+        "论文流程",
+        "选题",
+        "开题"
       ],
-      "source": "builtin",
+      "source": "local",
       "status": "verified",
       "upstream": {
         "repo": "dr-claw",
@@ -1702,129 +1749,177 @@
         "collection": "Paper Writing",
         "domain": "cs"
       }
+    },
+    {
+      "id": "mpacc-thesis-writer",
+      "name": "mpacc-thesis-writer",
+      "version": "1.0.0",
+      "description": "Draft, structure, revise, and quality-check MPAcc (会计专硕) graduation thesis work from topic selection through defense, using local MPAcc topic standards and user-provided evidence.",
+      "summary": "MPAcc thesis specialist for accounting-master topic selection, proposal, literature review, case analysis, outline, chapter drafting, citation planning, revision, quality review, and defense prep. Use local topic standards before excellent-thesis patterns.",
+      "stages": [
+        "ideation",
+        "publication",
+        "promotion"
+      ],
+      "tools": [
+        "read_file",
+        "search_project",
+        "write_file",
+        "run_terminal"
+      ],
+      "primaryIntent": "writing",
+      "intents": [
+        "ideation",
+        "writing",
+        "evaluation"
+      ],
+      "capabilities": [
+        "research-planning",
+        "visualization-reporting",
+        "evaluation-benchmarking"
+      ],
+      "domains": [
+        "accounting",
+        "mpacc",
+        "management"
+      ],
+      "keywords": [
+        "mpacc",
+        "会计专硕",
+        "毕业论文",
+        "选题",
+        "开题报告",
+        "案例分析",
+        "文献综述",
+        "论文写作",
+        "答辩",
+        "citation audit"
+      ],
+      "source": "local",
+      "status": "verified",
+      "resourceFlags": {
+        "hasReferences": true,
+        "hasScripts": true,
+        "hasTemplates": false,
+        "hasAssets": true,
+        "referenceCount": 19,
+        "scriptCount": 2,
+        "templateCount": 0,
+        "assetCount": 8,
+        "optionalScripts": true
+      },
+      "legacy": null
     }
   ],
   "stageSkillMap": {
     "survey": {
       "base": [
+        "mpacc-thesis-writer",
         "inno-deep-research",
-        "gemini-deep-research",
         "academic-researcher",
-        "dataset-discovery",
-        "biorxiv-database"
+        "paper-finder",
+        "paper-analyzer"
       ],
       "byTaskType": {
         "analysis": [
+          "mpacc-thesis-writer",
           "inno-deep-research",
-          "gemini-deep-research",
-          "academic-researcher"
+          "academic-researcher",
+          "paper-analyzer"
         ],
         "exploration": [
+          "mpacc-thesis-writer",
           "inno-deep-research",
-          "gemini-deep-research",
-          "dataset-discovery",
-          "biorxiv-database",
-          "academic-researcher"
+          "academic-researcher",
+          "paper-finder"
         ]
       }
     },
     "ideation": {
       "base": [
-        "inno-pipeline-planner",
-        "inno-prepare-resources",
-        "inno-deep-research",
-        "dataset-discovery",
-        "inno-idea-generation",
-        "inno-idea-eval",
-        "biorxiv-database",
-        "academic-researcher"
+        "research-pipeline-planner",
+        "research-idea-convergence",
+        "mpacc-thesis-writer",
+        "inno-pipeline-planner"
       ],
       "byTaskType": {
         "analysis": [
-          "inno-idea-generation",
-          "inno-idea-eval",
+          "research-idea-convergence",
+          "mpacc-thesis-writer",
           "inno-deep-research",
           "academic-researcher"
         ],
         "exploration": [
-          "inno-idea-generation",
-          "inno-code-survey",
-          "inno-deep-research",
-          "dataset-discovery",
-          "biorxiv-database",
-          "academic-researcher"
+          "research-idea-convergence",
+          "mpacc-thesis-writer",
+          "inno-deep-research"
         ],
         "implementation": [
-          "inno-prepare-resources"
+          "inno-pipeline-planner"
         ]
       }
     },
     "experiment": {
       "base": [
-        "inno-code-survey",
-        "dataset-discovery",
-        "inno-experiment-dev",
-        "inno-experiment-analysis",
-        "bioinformatics-init-analysis"
+        "mpacc-thesis-writer",
+        "research-pipeline-planner",
+        "inno-pipeline-planner"
       ],
       "byTaskType": {
-        "implementation": [
-          "inno-experiment-dev",
-          "bioinformatics-init-analysis"
-        ],
         "analysis": [
-          "inno-experiment-analysis",
-          "bioinformatics-init-analysis"
+          "mpacc-thesis-writer",
+          "research-pipeline-planner"
         ],
         "exploration": [
-          "inno-code-survey",
-          "dataset-discovery",
+          "mpacc-thesis-writer",
           "inno-deep-research",
-          "biorxiv-database"
+          "academic-researcher"
+        ],
+        "implementation": [
+          "inno-pipeline-planner",
+          "mpacc-thesis-writer"
         ]
       }
     },
     "publication": {
       "base": [
         "inno-paper-writing",
-        "inno-figure-gen",
+        "mpacc-thesis-writer",
         "inno-paper-reviewer",
         "inno-reference-audit",
-        "inno-rclone-to-overleaf",
-        "scientific-writing",
-        "ml-paper-writing",
-        "inno-grant-proposal"
+        "inno-figure-gen"
       ],
       "byTaskType": {
         "writing": [
           "inno-paper-writing",
-          "inno-figure-gen",
-          "scientific-writing",
-          "ml-paper-writing",
-          "inno-grant-proposal"
+          "mpacc-thesis-writer",
+          "inno-figure-gen"
         ],
         "analysis": [
           "inno-paper-reviewer",
-          "inno-reference-audit",
-          "inno-deep-research"
+          "mpacc-thesis-writer",
+          "inno-reference-audit"
         ],
         "delivery": [
-          "inno-rclone-to-overleaf"
+          "mpacc-thesis-writer"
         ]
       }
     },
     "promotion": {
       "base": [
+        "mpacc-thesis-writer",
         "making-academic-presentations"
       ],
       "byTaskType": {
         "scripting": [
+          "mpacc-thesis-writer",
           "making-academic-presentations"
         ],
         "rendering": [
           "making-academic-presentations"
         ],
         "narration": [
+          "mpacc-thesis-writer",
           "making-academic-presentations"
         ],
         "delivery": [

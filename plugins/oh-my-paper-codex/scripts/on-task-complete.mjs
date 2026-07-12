@@ -4,6 +4,8 @@
  * 手动触发：echo "..." | node scripts/on-task-complete.mjs
  */
 import fs from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 
 const PROJECT = process.cwd();
@@ -17,8 +19,11 @@ async function main() {
 
   const reviewLogPath = path.join(PROJECT, ".pipeline", "memory", "review_log.md");
   const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
+  const marker = `<!-- omp-executor-report:${createHash("sha256").update(JSON.stringify(report)).digest("hex").slice(0, 16)} -->`;
+  if (existsSync(reviewLogPath) && readFileSync(reviewLogPath, "utf8").includes(marker)) return;
   const entry = [
-    `\n## Executor Report — ${ts}`,
+    `\n${marker}`,
+    `## Executor Report — ${ts}`,
     `**Task**: ${report.taskId || "unknown"}`,
     `**Summary**: ${report.summary || ""}`,
     `**Confidence**: ${report.confidence || "unknown"}`,
@@ -40,7 +45,6 @@ async function main() {
     "utf8"
   );
 
-  console.log(`✅ Executor report for '${report.taskId}' added to review_log.md`);
 }
 
 function extractExecutorReport(text) {
@@ -56,4 +60,5 @@ async function readStdin() {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-main().catch(() => process.exit(0));
+main().then(() => process.stdout.write(JSON.stringify({ continue: true }) + "\n"))
+  .catch(() => process.stdout.write(JSON.stringify({ continue: true }) + "\n"));

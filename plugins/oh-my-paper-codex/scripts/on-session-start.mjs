@@ -12,14 +12,20 @@ const SESSION_CONTEXT = path.join(PROJECT, ".pipeline", ".session-context.md");
 const TTL_MS = 5 * 60 * 1000;
 
 async function main() {
-  // 如果已经有新鲜的 context，跳过
+  // If a fresh context exists, return it in Codex's JSON hook envelope.
   if (existsSync(SESSION_CONTEXT)) {
-    if (Date.now() - statSync(SESSION_CONTEXT).mtimeMs < TTL_MS) return;
+    if (Date.now() - statSync(SESSION_CONTEXT).mtimeMs < TTL_MS) {
+      emitAdditionalContext(readFileSync(SESSION_CONTEXT, "utf8"));
+      return;
+    }
   }
 
   // 检查是否是研究项目
   const pipelineDir = path.join(PROJECT, ".pipeline");
-  if (!existsSync(pipelineDir)) return;
+  if (!existsSync(pipelineDir)) {
+    emitAdditionalContext("");
+    return;
+  }
 
   const lines = ["# Session Context (Auto-generated)", ""];
 
@@ -59,12 +65,19 @@ async function main() {
 
   const output = lines.join("\n");
 
-  // 输出到 stdout
-  process.stdout.write(output + "\n");
-
-  // 同时写文件备用
+  // Keep a project-local copy for people and other runtime views.
   await fs.mkdir(path.dirname(SESSION_CONTEXT), { recursive: true });
   await fs.writeFile(SESSION_CONTEXT, output, "utf8");
+  emitAdditionalContext(output);
 }
 
-main().catch(() => process.exit(0));
+function emitAdditionalContext(context) {
+  process.stdout.write(JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext: context,
+    },
+  }) + "\n");
+}
+
+main().catch(() => emitAdditionalContext(""));

@@ -11,6 +11,61 @@ permissions:
   contents: read
 
 jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-22.04, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            sidecar/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install Node dependencies
+        run: |
+          npm ci
+          npm ci --prefix sidecar
+
+      - name: Validate Codex bundle and frontend
+        run: |
+          npm run sidecar:build
+          npm test
+          npm run skills:research:check
+          npm run skills:codex-plugin:check
+          npm run test:codex-plugin
+
+      - name: Report lint baseline
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
   build:
     strategy:
       fail-fast: false

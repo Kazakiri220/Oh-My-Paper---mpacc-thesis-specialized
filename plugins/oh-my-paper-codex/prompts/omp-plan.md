@@ -39,7 +39,7 @@ cat .pipeline/memory/decision_log.md
 
 ## 第三步：根据用户选择行动
 
-- 选择继续：准备 `execution_context.md`，建议使用对应的命令（`/omp-delegate`、`/omp-survey` 等）
+- 选择继续：准备 `execution_context.md`，建议使用对应的 Skill（`$omp-delegate`、`$omp-survey` 等）
 - 选择调整：进一步了解想法，更新计划
 - 选择查看任务：列出当前阶段所有任务及状态
 

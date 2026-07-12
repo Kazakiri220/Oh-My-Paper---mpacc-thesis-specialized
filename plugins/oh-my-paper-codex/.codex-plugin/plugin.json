@@ -1,13 +1,13 @@
 {
   "name": "oh-my-paper-codex",
-  "version": "1.0.0",
-  "description": "Oh My Paper research harness for Codex: research roles, slash commands, shared skills, and a structured memory system for academic projects.",
+  "version": "0.2.2",
+  "description": "Oh My Paper research harness for Codex, bundled with MPAcc workflow Skills and structured project-memory guidance.",
   "author": {
     "name": "LigphiDonk",
     "url": "https://github.com/LigphiDonk"
   },
-  "homepage": "https://github.com/LigphiDonk/Oh-my--paper",
-  "repository": "https://github.com/LigphiDonk/Oh-my--paper",
+  "homepage": "https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized",
+  "repository": "https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized",
   "license": "MIT",
   "keywords": [
     "research",
@@ -17,10 +17,11 @@
     "codex"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Oh My Paper",
     "shortDescription": "Research pipeline for Codex projects",
-    "longDescription": "Run literature surveys, ideation, experiments, and paper writing inside Codex with structured prompts, role-specific agents, and shared research skills.",
+    "longDescription": "Run literature surveys, ideation, experiments, paper writing, review, and pipeline synchronization inside Codex with bundled workflow Skills.",
     "developerName": "LigphiDonk",
     "category": "Productivity",
     "capabilities": [
@@ -28,9 +29,9 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/LigphiDonk/Oh-my--paper",
-    "privacyPolicyURL": "https://github.com/LigphiDonk/Oh-my--paper",
-    "termsOfServiceURL": "https://github.com/LigphiDonk/Oh-my--paper",
+    "websiteURL": "https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized",
+    "privacyPolicyURL": "https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized",
+    "termsOfServiceURL": "https://github.com/Kazakiri220/Oh-My-Paper---mpacc-thesis-specialized",
     "defaultPrompt": [
       "Set up a research project with Oh My Paper",
       "Run a literature survey for my paper topic",

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::ChildStdin;
+use std::process::{Child, ChildStdin};
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex, RwLock};
 
@@ -19,6 +19,9 @@ pub struct AppState {
     pub skills_dir: PathBuf,
     pub app_data_dir: PathBuf,
     pub active_sidecar: Mutex<Option<u32>>,
+    /// Retains the direct CLI child so cancellation can terminate it even
+    /// when Windows refuses a PID-only `taskkill` request.
+    pub active_cli_child: Mutex<Option<Arc<Mutex<Child>>>>,
     pub sidecar_cancelled: AtomicBool,
     /// Stdin handle for the active sidecar process, used to send permission
     /// responses back to the running Claude Code SDK runner.
@@ -132,9 +135,7 @@ fn infer_main_tex(root: &Path) -> String {
             .flatten()
             .filter_map(|entry| {
                 let path = entry.path();
-                if path.is_file()
-                    && path.extension().and_then(|ext| ext.to_str()) == Some("tex")
-                {
+                if path.is_file() && path.extension().and_then(|ext| ext.to_str()) == Some("tex") {
                     path.file_name()
                         .map(|name| name.to_string_lossy().to_string())
                 } else {
